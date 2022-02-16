@@ -3,6 +3,8 @@
 - `arch`: Arch Linux icon
 - `ubuntu`: Ubuntu icon
 - `raspberrypi`: Raspberry Pi icon
+- `debian`: Debian icon **(WIP)**
+- `linux`: Image of Tux
 
 ## Games
 ### Battlefield
