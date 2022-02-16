@@ -50,4 +50,3 @@ These are neccesary in order for the client to know title and cover asset of the
 
 # RPC-Assets
 Every Rich Presence Asset can be found in the [asset list](RPC-Assets.md).
-# Cyrkensia
