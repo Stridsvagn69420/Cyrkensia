@@ -29,7 +29,7 @@ func main() {
 	locked := flag.Bool("L", false, "If set to true, files are password protected (default: false)")
 	accessFile := flag.String("A", "ILLEGAL", "Path to .htaccess file to manage users (Required if -L is set to true)")
 	name := flag.String("N", "Cyrkensia", "Name of the server")
-	CDNroot := flag.String("R", "", "(Optional) Path for files endpoint in HTTP\nOnly use this if the server's behind a rerverse proxy")
+	CDNroot := flag.String("R", "", "(Optional) Path for files endpoint in HTTP")
 	icon := flag.String("i", "discordicon", "Icon to use for the server")
 	flag.Parse()
 	// Exit if no access file is specified but locked is true
