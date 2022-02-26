@@ -21,6 +21,8 @@
 ### Command-Line
 - `kagero`: App icon of [Kagero](https://github.com/Stridsvagn69420/Kagero) **(WIP)**
 - `orochi`: App icon of [Orochi](https://github.com/Stridsvagn69420/Orochi) **(WIP)**
+- `peri`: App icon of [Peri](https://github.com/Peri-Loves-Violence/peri) **(WIP)**
+- `peri-gunship` Icon of the [gunship](https://github.com/Peri-Loves-Violence/gunship) library **(WIP)**
 
 ### Desktop
 - `azura`: App icon of [Azura](https://github.com/Stridsvagn69420/Azura) **(WIP)**
