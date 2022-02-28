@@ -1,9 +1,13 @@
 package main
 
 import (
+	"Cyrkensia/server"
 	"Cyrkensia/utils"
 	"flag"
 	"path/filepath"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -23,4 +27,14 @@ func main() {
 
 	// ------ Config ------
 	utils.LoadConfig(*configPath)
+
+	// ------ Server ------
+	app := fiber.New()
+	// Routes
+	app.Get("/", server.HostinfoEndpoint)
+	app.Get("/hostinfo", server.HostinfoEndpoint)
+	app.Get("/hostinfo.json", server.HostinfoEndpoint)
+
+	// Start
+	app.Listen(utils.Config.BindAddr + ":" + strconv.Itoa(utils.Config.Port))
 }

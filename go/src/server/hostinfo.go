@@ -2,10 +2,11 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"strconv"
 
 	"Cyrkensia/utils"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type Hostinfo struct {
@@ -29,25 +30,10 @@ type File struct {
 	Size int    `json:"size"`
 }
 
-func HostinfoEndpoint(w http.ResponseWriter, r *http.Request) {
-	// security check
-	if r.URL.Path != "/hostinfo" {
-		http.Error(w, "404 not found.", http.StatusNotFound)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method is not supported.", http.StatusNotFound)
-		return
-	}
+func HostinfoEndpoint(c *fiber.Ctx) error {
 	// Generate hostinfo
-	var protocol string
-	if utils.Config.Locked {
-		protocol = "https"
-	} else {
-		protocol = "http"
-	}
 	size, err := utils.DirSize(utils.Config.CDNpath)
-	ServerError500(w, r, err)
+	ServerError500(c, err)
 	// TODO: add albums
 	hostinfo := Hostinfo{
 		Name:      utils.Config.Name,
@@ -55,13 +41,13 @@ func HostinfoEndpoint(w http.ResponseWriter, r *http.Request) {
 		Uuid:      utils.Config.Uuid,
 		Secured:   utils.Config.Locked,
 		Root:      "",
-		OriginURI: protocol + "://" + r.Host + r.URL.Path,
+		OriginURI: c.Protocol() + "://" + c.Hostname() + c.Path(),
 		Size:      int(size),
 	}
 	// send hostinfo response
 	json, err := json.Marshal(hostinfo)
-	ServerError500(w, r, err)
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(json)))
-	w.Write(json)
+	ServerError500(c, err)
+	c.Append("Content-Type", "application/json")
+	c.Append("Content-Length", strconv.Itoa(len(json)))
+	return c.Send(json)
 }

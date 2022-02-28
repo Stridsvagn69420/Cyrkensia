@@ -15,3 +15,6 @@ test:
 
 run:
 	go run src/cyrkensia.go
+
+help:
+	go run src/cyrkensia.go -h

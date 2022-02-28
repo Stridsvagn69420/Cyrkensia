@@ -2,13 +2,13 @@ package server
 
 import (
 	"log"
-	"net/http"
+
+	"github.com/gofiber/fiber/v2"
 )
 
-func ServerError500(w http.ResponseWriter, r *http.Request, err error) {
+func ServerError500(c *fiber.Ctx, err error) {
 	if err != nil {
 		log.Fatal(err)
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-		return
+		c.Status(500).SendString("Internal Server Error")
 	}
 }
