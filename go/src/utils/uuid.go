@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"os"
 	"path"
 
@@ -21,4 +22,13 @@ func GetUUID(homedir string) string {
 		ID = string(content)
 	}
 	return ID
+}
+
+func GetHomeDir() string {
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	return dirname
 }

@@ -46,7 +46,7 @@ func HostinfoEndpoint(w http.ResponseWriter, r *http.Request) {
 	} else {
 		protocol = "http"
 	}
-	size, err := utils.DirSize(utils.Config.Root)
+	size, err := utils.DirSize(utils.Config.CDNpath)
 	ServerError500(w, r, err)
 	// TODO: add albums
 	hostinfo := Hostinfo{
@@ -54,7 +54,7 @@ func HostinfoEndpoint(w http.ResponseWriter, r *http.Request) {
 		Hosticon:  utils.Config.Icon,
 		Uuid:      utils.Config.Uuid,
 		Secured:   utils.Config.Locked,
-		Root:      utils.Config.CDNroot,
+		Root:      "",
 		OriginURI: protocol + "://" + r.Host + r.URL.Path,
 		Size:      int(size),
 	}
