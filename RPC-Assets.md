@@ -4,7 +4,7 @@
 - `ubuntu`: Ubuntu icon
 - `raspberrypi`: Raspberry Pi icon
 - `debian`: Debian icon **(WIP)**
-- `linux`: Image of Tux
+- `linux`: Image of Tux **(WIP)**
 
 ## Games
 ### Battlefield
