@@ -15,7 +15,6 @@ You can find every info, from installing Cyrkensia to just looking at available 
 * [Installation](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation)
 * [Usage](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Usage)
 
-
 ## PHP
 * [Installation with nginx](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation-(PHP)#nginx)
 * [Installation with Apache](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation-(PHP)#apache)
