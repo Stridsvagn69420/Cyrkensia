@@ -16,6 +16,8 @@ type ConfigType struct {
 	Locked   bool
 	Name     string `json:"vendorName"`
 	Access   string `json:"htpasswd"`
+	Pem      string `json:"pemTLS"`
+	Key      string `json:"keyTLS"`
 }
 
 var Config ConfigType
@@ -23,8 +25,8 @@ var Config ConfigType
 func LoadConfig(path string) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		// File does not exist
-		fmt.Println("Config file does not exist! Please make sure that your given path is correct and that it points to a valid JSON file.")
-		fmt.Println("See https://github.com/Stridsvagn69420/Cyrkensia/blob/master/go/README.md#config-file or the local README.md for more.")
+		fmt.Println("\033[31mConfig file does not exist!\033[0m Please make sure that your given path is correct and that it points to a valid JSON file.")
+		fmt.Println("\033[33mSee https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation#-config-file or the local README.md for more.\033[0m")
 		os.Exit(1)
 	} else {
 		// Load config to config.Config from given json file in path
@@ -39,6 +41,8 @@ func LoadConfig(path string) {
 		assignIfEmpty(&Config.Uuid, tmpConfig.Uuid)
 		assignIfEmpty(&Config.Name, tmpConfig.Name)
 		assignIfEmpty(&Config.Access, tmpConfig.Access)
+		assignIfEmpty(&Config.Pem, tmpConfig.Pem)
+		assignIfEmpty(&Config.Key, tmpConfig.Key)
 
 		// Special case for Locked and Port
 		if Config.Port == 0 {

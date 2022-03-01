@@ -47,7 +47,7 @@ func HostinfoEndpoint(c *fiber.Ctx) error {
 	// send hostinfo response
 	json, err := json.Marshal(hostinfo)
 	ServerError500(c, err)
-	c.Append("Content-Type", "application/json")
+	c.Append("Content-Type", fiber.MIMEApplicationJSON)
 	c.Append("Content-Length", strconv.Itoa(len(json)))
-	return c.Send(json)
+	return c.Status(fiber.StatusOK).Send(json)
 }

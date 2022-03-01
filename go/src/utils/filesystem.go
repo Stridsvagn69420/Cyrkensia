@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -27,4 +28,12 @@ func GetHomeDir() string {
 		os.Exit(1)
 	}
 	return dirname
+}
+
+func FileExists(path string) bool {
+	if _, err := os.Stat("/path/to/whatever"); errors.Is(err, os.ErrNotExist) {
+		return false
+	} else {
+		return true
+	}
 }

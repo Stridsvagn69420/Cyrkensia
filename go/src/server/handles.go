@@ -9,6 +9,6 @@ import (
 func ServerError500(c *fiber.Ctx, err error) {
 	if err != nil {
 		log.Fatal(err)
-		c.Status(500).SendString("Internal Server Error")
+		c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 	}
 }
