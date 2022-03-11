@@ -40,9 +40,12 @@ func main() {
 		TimeFormat: "2006-01-02 15:04:05",
 	}))
 	// Routes
-	app.Get("/", server.MainServer)
-	app.Get("/hostinfo", server.HostinfoEndpoint)
-	app.Get("/hostinfo.json", server.HostinfoEndpoint)
+	app.Get("/", server.HostinfoEndpoint)
+	if utils.Config.Locked {
+		app.Get("/:directry/:file", server.FileServerLocked)
+	} else {
+		app.Get("/:directory/:file", server.FileServer)
+	}
 
 	// Start
 	if utils.Config.Key != "" && utils.Config.Pem != "" && utils.FileExists(utils.Config.Key) && utils.FileExists(utils.Config.Pem) {

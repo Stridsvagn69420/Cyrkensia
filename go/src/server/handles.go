@@ -6,17 +6,22 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func ServerError500(c *fiber.Ctx, err error) {
+func ServerError500(c *fiber.Ctx, err error) error {
 	if err != nil {
 		log.Fatal(err)
-		c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
+		return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 	}
+	return nil
 }
 
-func AuthError401(c *fiber.Ctx) {
-	c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
+func AuthError401(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
 }
 
-func ServeError404(c *fiber.Ctx) {
-	c.Status(fiber.StatusNotFound).SendString("Not Found")
+func ServeError404(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusNotFound).SendString("Not Found")
+}
+
+func Forbidden403(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 }

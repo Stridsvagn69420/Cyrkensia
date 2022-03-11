@@ -48,6 +48,10 @@ func HostinfoEndpoint(c *fiber.Ctx) error {
 		OriginURI: c.Protocol() + "://" + c.Hostname() + c.Path(),
 	}
 	hostinfo.Albums, hostinfo.Size = readAlbums(c, utils.Config.CDNpath)
+	// headers
+	c.Set("X-License", "AGPLv3")
+	c.Set("X-License-URL", "https://www.gnu.org/licenses/agpl-3.0.html")
+	c.Set("X-Source-Code", "https://github.com/Stridsvagn69420/Cyrkensia")
 	// send hostinfo response
 	json, err := json.Marshal(hostinfo)
 	ServerError500(c, err)
