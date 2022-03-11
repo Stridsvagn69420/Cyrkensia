@@ -103,7 +103,7 @@ func readFiles(c *fiber.Ctx, dirpath string, size *int) []MusicFile {
 		ServerError500(c, err)
 	}
 	for i, file := range files {
-		if !file.IsDir() {
+		if !file.IsDir() && file.Name() != ".metadata.json" {
 			filesize := int(file.Size())
 			file := MusicFile{
 				Name: file.Name(),
