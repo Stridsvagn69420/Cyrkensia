@@ -4,6 +4,7 @@ import (
 	"Cyrkensia/utils"
 
 	"encoding/base64"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -12,7 +13,15 @@ import (
 )
 
 func FileServer(c *fiber.Ctx) error {
-	filePath := filepath.Join(utils.Config.CDNpath, c.Params("directory"), c.Params("file"))
+	directory, err := url.QueryUnescape(c.Params("directory"))
+	if err != nil {
+		return ServerError500(c, err)
+	}
+	file, err := url.QueryUnescape(c.Params("file"))
+	if err != nil {
+		return ServerError500(c, err)
+	}
+	filePath := filepath.Join(utils.Config.CDNpath, directory, file)
 	return sendIfExists(c, filePath)
 }
 
