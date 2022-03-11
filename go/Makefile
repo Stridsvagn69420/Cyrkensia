@@ -1,11 +1,8 @@
+executable:
+	cd src; go build -o ../build -ldflags="-s -w" cyrkensia.go
+
 install:
-	@cd src; go install cyrkensia.go
-
-windows:
-	@cd src; go build -o ../build/cyrkensia.exe cyrkensia.go
-
-linux:
-	@cd src; go build -o ../build/cyrkensia cyrkensia.go
+	cd src; go install cyrkensia.go
 
 run:
 	@cd src; go run cyrkensia.go

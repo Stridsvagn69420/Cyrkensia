@@ -36,9 +36,12 @@ func RouteEndpoint(c *fiber.Ctx) error {
 	case "github":
 		return c.Redirect("https://github.com/Stridsvagn69420/Cyrkensia", fiber.StatusMovedPermanently)
 
+	// Hostinfo
+	case "hostinfo":
+		return HostinfoEndpoint(c)
 	// License
 	case "license":
-		return c.Redirect("https://www.gnu.org/licenses/agpl-3.0.de.html", fiber.StatusMovedPermanently)
+		return c.Redirect("https://www.gnu.org/licenses/agpl-3.0.html", fiber.StatusMovedPermanently)
 
 	// Album Index
 	default:
