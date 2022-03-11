@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
 func GetHomeDir() string {
@@ -23,16 +24,15 @@ func FileExists(path string) bool {
 	}
 }
 
-func ListFiles(path string) []string {
+func ListFiles(path string) ([]string, error) {
 	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		log.Fatal(err)
-	}
 	var fileList []string
 	for _, f := range files {
-		fileList = append(fileList, f.Name())
+		if !strings.HasPrefix(f.Name(), ".") && !f.IsDir() {
+			fileList = append(fileList, f.Name())
+		}
 	}
-	return fileList
+	return fileList, err
 }
 
 func ArrayContains(arr []string, str string) bool {

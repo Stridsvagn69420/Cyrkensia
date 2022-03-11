@@ -50,6 +50,7 @@ func main() {
 	app.Use(server.AgplHeaders)
 	// Routes
 	app.Get("/", server.HostinfoEndpoint)
+	app.Get("/:route", server.RouteEndpoint)
 	if utils.Config.Locked {
 		app.Get("/:directory/:file", server.FileServerLocked)
 	} else {
