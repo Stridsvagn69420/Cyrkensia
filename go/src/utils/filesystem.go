@@ -17,22 +17,22 @@ func GetHomeDir() string {
 }
 
 func FileExists(path string) bool {
-	if _, err := os.Stat("/path/to/whatever"); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		return false
 	} else {
 		return true
 	}
 }
 
-func ListFiles(path string) ([]string, error) {
-	files, err := ioutil.ReadDir(path)
+func ListFiles(path string) []string {
+	files, _ := ioutil.ReadDir(path)
 	var fileList []string
 	for _, f := range files {
 		if !strings.HasPrefix(f.Name(), ".") && !f.IsDir() {
 			fileList = append(fileList, f.Name())
 		}
 	}
-	return fileList, err
+	return fileList
 }
 
 func ArrayContains(arr []string, str string) bool {

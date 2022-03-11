@@ -43,11 +43,12 @@ func RouteEndpoint(c *fiber.Ctx) error {
 	// Album Index
 	default:
 		albumRoot := filepath.Join(utils.Config.CDNpath, route)
-		fileList, err := utils.ListFiles(albumRoot)
-		if err != nil {
+		if utils.FileExists(albumRoot) {
+			fileList := utils.ListFiles(albumRoot)
+			return c.JSON(fileList)
+		} else {
 			return ServeError404(c)
 		}
-		return c.JSON(fileList)
 	}
 }
 
