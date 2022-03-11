@@ -4,6 +4,7 @@ import (
 	"Cyrkensia/server"
 	"Cyrkensia/utils"
 	"flag"
+	"fmt"
 	"path/filepath"
 	"strconv"
 
@@ -33,16 +34,24 @@ func main() {
 
 	// ------ Server ------
 	// Initialize server
+	if utils.Config.Locked {
+		if err := server.InitHtpasswdAuth(utils.Config.Access); err != nil {
+			fmt.Println("\033[31mAn error occured while initializing HTTP-Basic Auth!\033[0m")
+			fmt.Println("\033[33mWARNING: Authorization will be disabled...\033[0m")
+			utils.Config.Locked = false
+		}
+	}
 	app := fiber.New()
 	app.Use(logger.New(logger.Config{
 		Format:     "[${ip}]:${port} ${status} - ${method} ${path}\n",
 		TimeZone:   "UTC",
 		TimeFormat: "2006-01-02 15:04:05",
 	}))
+	app.Use(server.AgplHeaders)
 	// Routes
 	app.Get("/", server.HostinfoEndpoint)
 	if utils.Config.Locked {
-		app.Get("/:directry/:file", server.FileServerLocked)
+		app.Get("/:directory/:file", server.FileServerLocked)
 	} else {
 		app.Get("/:directory/:file", server.FileServer)
 	}

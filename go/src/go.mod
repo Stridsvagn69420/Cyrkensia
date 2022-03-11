@@ -3,11 +3,11 @@ module Cyrkensia
 go 1.17
 
 require github.com/gofiber/fiber/v2 v2.29.0
+require github.com/tg123/go-htpasswd v1.2.0
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
-	github.com/tg123/go-htpasswd v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.34.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
