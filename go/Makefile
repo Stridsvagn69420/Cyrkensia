@@ -1,5 +1,5 @@
 executable:
-	cd src; go build -o ../build -ldflags="-s -w" cyrkensia.go
+	cd src; go build -o ../build/ -ldflags="-s -w" cyrkensia.go
 
 install:
 	cd src; go install cyrkensia.go
