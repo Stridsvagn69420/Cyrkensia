@@ -40,7 +40,7 @@ func main() {
 		TimeFormat: "2006-01-02 15:04:05",
 	}))
 	// Routes
-	app.Get("/", server.HostinfoEndpoint)
+	app.Get("/", server.MainServer)
 	app.Get("/hostinfo", server.HostinfoEndpoint)
 	app.Get("/hostinfo.json", server.HostinfoEndpoint)
 
