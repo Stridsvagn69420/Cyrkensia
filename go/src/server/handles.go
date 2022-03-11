@@ -15,6 +15,7 @@ func ServerError500(c *fiber.Ctx, err error) error {
 }
 
 func AuthError401(c *fiber.Ctx) error {
+	c.Set("WWW-Authenticate", "Basic realm=Cyrkensia")
 	return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
 }
 

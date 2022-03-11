@@ -2,7 +2,10 @@ package server
 
 import (
 	"Cyrkensia/utils"
+
+	"encoding/base64"
 	"path/filepath"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/tg123/go-htpasswd"
@@ -14,7 +17,20 @@ func FileServer(c *fiber.Ctx) error {
 }
 
 func FileServerLocked(c *fiber.Ctx) error {
-	return FileServer(c)
+	userpass := c.GetReqHeaders()["Authorization"]
+	if userpass == "" {
+		return AuthError401(c)
+	}
+	decodedBytes, err := base64.StdEncoding.DecodeString(userpass[6:])
+	ServerError500(c, err)
+	decoded := strings.Split(string(decodedBytes), ":")
+	if len(decoded) != 2 {
+		return AuthError401(c)
+	}
+	if Auth.Match(decoded[0], decoded[1]) {
+		return FileServer(c)
+	}
+	return AuthError401(c)
 }
 
 var Auth *htpasswd.File
