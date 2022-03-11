@@ -4,6 +4,9 @@ executable:
 install:
 	cd src; go install cyrkensia.go
 
+release:
+	pwsh ./Release.ps1
+
 run:
 	@cd src; go run cyrkensia.go
 
