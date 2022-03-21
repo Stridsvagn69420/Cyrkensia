@@ -2,7 +2,7 @@ module Cyrkensia
 
 go 1.17
 
-require github.com/gofiber/fiber/v2 v2.29.0
+require github.com/gofiber/fiber/v2 v2.30.0
 
 require github.com/tg123/go-htpasswd v1.2.0
 
