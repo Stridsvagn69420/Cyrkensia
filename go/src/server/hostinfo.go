@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"path"
 	"strconv"
 
@@ -67,14 +68,16 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 	for i, file := range files {
 		if file.IsDir() {
 			albumpath := path.Join(pathdir, file.Name())
-			meta := readMetadata(c, albumpath)
-			album := Album{
-				Name:  meta.Name,
-				Dir:   file.Name(),
-				Cover: meta.Cover,
-				Files: readFiles(c, albumpath, &size),
+			if _, finderr := os.Stat(path.Join(albumpath, ".metadata.json")); finderr == nil {
+				meta := readMetadata(c, albumpath)
+				album := Album{
+					Name:  meta.Name,
+					Dir:   file.Name(),
+					Cover: meta.Cover,
+					Files: readFiles(c, albumpath, &size),
+				}
+				albums[i] = album
 			}
-			albums[i] = album
 		}
 	}
 	if len(albums) == 0 {
