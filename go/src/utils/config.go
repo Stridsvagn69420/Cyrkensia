@@ -3,8 +3,9 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
+
+	"github.com/Stridsvagn69420/pringo"
 )
 
 type ConfigType struct {
@@ -25,8 +26,8 @@ var Config ConfigType
 func LoadConfig(path string) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		// File does not exist
-		fmt.Println("\033[31mConfig file does not exist!\033[0m Please make sure that your given path is correct and that it points to a valid JSON file.")
-		fmt.Println("\033[33mSee https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation#-config-file or the local README.md for more.\033[0m")
+		Prnt.Println("Config file does not exist! Please make sure that your given path is correct and that it points to a valid JSON file.", pringo.Red)
+		Prnt.Println("See https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation#-config-file or the local README.md for more.", pringo.Yellow)
 		os.Exit(1)
 	} else {
 		// Load config to config.Config from given json file in path

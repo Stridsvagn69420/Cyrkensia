@@ -4,9 +4,10 @@ import (
 	"Cyrkensia/server"
 	"Cyrkensia/utils"
 	"flag"
-	"fmt"
 	"path/filepath"
 	"strconv"
+
+	"github.com/Stridsvagn69420/pringo"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -36,8 +37,8 @@ func main() {
 	// Initialize server
 	if utils.Config.Locked {
 		if err := server.InitHtpasswdAuth(utils.Config.Access); err != nil {
-			fmt.Println("\033[31mAn error occured while initializing HTTP-Basic Auth!\033[0m")
-			fmt.Println("\033[33mWARNING: Authorization will be disabled...\033[0m")
+			utils.Prnt.Println("An error occured while initializing HTTP-Basic Auth!", pringo.Red)
+			utils.Prnt.Println("WARNING: Authorization will be disabled...", pringo.Yellow)
 			utils.Config.Locked = false
 		}
 	}
