@@ -1,14 +1,16 @@
 package server
 
 import (
-	"log"
+	"Cyrkensia/utils"
+
+	"github.com/Stridsvagn69420/pringo"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func ServerError500(c *fiber.Ctx, err error) error {
 	if err != nil {
-		log.Fatal(err)
+		utils.Prnt.Errorln(err.Error(), pringo.Red)
 		return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 	}
 	return nil
