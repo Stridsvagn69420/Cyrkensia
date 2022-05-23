@@ -3,7 +3,9 @@ package main
 import (
 	"Cyrkensia/server"
 	"Cyrkensia/utils"
+
 	"flag"
+	"net"
 	"path/filepath"
 	"strconv"
 
@@ -60,13 +62,28 @@ func main() {
 	}
 
 	// Start
-	if utils.Config.Key != "" && utils.Config.Pem != "" && utils.FileExists(utils.Config.Key) && utils.FileExists(utils.Config.Pem) {
-		app.ListenTLS(
-			utils.Config.BindAddr+":"+strconv.Itoa(utils.Config.Port),
-			utils.Config.Pem,
-			utils.Config.Key,
-		)
+	if utils.Config.Port < 1 {
+		// Listen on HTTP
+		if utils.Config.Key != "" && utils.Config.Pem != "" && utils.FileExists(utils.Config.Key) && utils.FileExists(utils.Config.Pem) {
+			app.ListenTLS(
+				utils.Config.BindAddr+":"+strconv.Itoa(utils.Config.Port),
+				utils.Config.Pem,
+				utils.Config.Key,
+			)
+		} else {
+			app.Listen(utils.Config.BindAddr + ":" + strconv.Itoa(utils.Config.Port))
+		}
 	} else {
-		app.Listen(utils.Config.BindAddr + ":" + strconv.Itoa(utils.Config.Port))
+		// Listen on Unix Socket
+		unixlisten, errlisten := net.Listen("unix", utils.Config.BindAddr)
+		if errlisten != nil {
+			utils.Prnt.Println("Could not create a listener for a Unix socket! Please check your config!", pringo.Red)
+		} else {
+			err := app.Listener(unixlisten)
+			if err != nil {
+				utils.Prnt.Errorln("Could not listen on a Unix Socket! Please check your config!", pringo.Red)
+			}
+		}
 	}
+
 }
