@@ -1,4 +1,4 @@
-module Cyrkensia
+module github.com/Stridsvagn69420/Cyrkensia/go
 
 go 1.17
 

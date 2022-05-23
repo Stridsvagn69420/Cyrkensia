@@ -1,7 +1,7 @@
 package server
 
 import (
-	"Cyrkensia/utils"
+	"github.com/Stridsvagn69420/Cyrkensia/go/utils"
 
 	"encoding/base64"
 	"net/url"
