@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/Stridsvagn69420/Cyrkensia/go/server"
-	"github.com/Stridsvagn69420/Cyrkensia/go/utils"
+	"github.com/Stridsvagn69420/Cyrkensia/go/src/server"
+	"github.com/Stridsvagn69420/Cyrkensia/go/src/utils"
 
 	"github.com/Stridsvagn69420/pringo"
 

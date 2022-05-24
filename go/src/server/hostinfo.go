@@ -7,7 +7,7 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/Stridsvagn69420/Cyrkensia/go/utils"
+	"github.com/Stridsvagn69420/Cyrkensia/go/src/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
