@@ -2,7 +2,7 @@ module github.com/Stridsvagn69420/Cyrkensia/go/src
 
 go 1.17
 
-require github.com/gofiber/fiber/v2 v2.34.0
+require github.com/gofiber/fiber/v2 v2.34.1
 
 require (
 	github.com/Stridsvagn69420/pringo v0.9.1
