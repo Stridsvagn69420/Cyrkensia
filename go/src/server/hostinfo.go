@@ -23,14 +23,10 @@ type Hostinfo struct {
 	Albums    []Album `json:"albums"`
 }
 type Album struct {
-	Cover string      `json:"cover"`
-	Dir   string      `json:"dir"`
-	Name  string      `json:"name"`
-	Files []MusicFile `json:"files"`
-}
-type MusicFile struct {
-	Name string `json:"name"`
-	Size int    `json:"size"`
+	Cover string   `json:"cover"`
+	Dir   string   `json:"dir"`
+	Name  string   `json:"name"`
+	Files []string `json:"files"`
 }
 
 type metadata struct {
@@ -59,13 +55,13 @@ func HostinfoEndpoint(c *fiber.Ctx) error {
 
 // Hostinfo specific IO functions for reading out available songs and albums
 func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
-	size := 0
 	files, err := ioutil.ReadDir(pathdir)
-	albums := make([]Album, len(files))
 	if err != nil {
 		ServerError500(c, err)
 	}
-	for i, file := range files {
+	size := 0
+	var albums []Album
+	for _, file := range files {
 		if file.IsDir() {
 			albumpath := path.Join(pathdir, file.Name())
 			if _, finderr := os.Stat(path.Join(albumpath, ".metadata.json")); finderr == nil {
@@ -76,7 +72,7 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 					Cover: meta.Cover,
 					Files: readFiles(c, albumpath, &size),
 				}
-				albums[i] = album
+				albums = append(albums, album)
 			}
 		}
 	}
@@ -99,21 +95,16 @@ func readMetadata(c *fiber.Ctx, dirpath string) metadata {
 	return metadata
 }
 
-func readFiles(c *fiber.Ctx, dirpath string, size *int) []MusicFile {
+func readFiles(c *fiber.Ctx, dirpath string, size *int) []string {
 	files, err := ioutil.ReadDir(dirpath)
-	musicfiles := make([]MusicFile, len(files))
+	musicfiles := make([]string, len(files)-1)
 	if err != nil {
 		ServerError500(c, err)
 	}
 	for i, file := range files {
 		if !file.IsDir() && file.Name() != ".metadata.json" {
-			filesize := int(file.Size())
-			file := MusicFile{
-				Name: file.Name(),
-				Size: filesize,
-			}
-			*size += filesize
-			musicfiles[i] = file
+			*size += int(file.Size())
+			musicfiles[i-1] = file.Name()
 		}
 	}
 	return musicfiles
