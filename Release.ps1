@@ -11,14 +11,12 @@ foreach ($osArch in $rawArray) {
     if ($env:GOOS -eq "windows") {
         $filename += ".exe"
     }
-    Set-Location src
-    (go build -o ../build/$filename -ldflags="-s -w" cyrkensia.go) | Out-Null
+    (go build -o build/$filename -ldflags="-s -w" cyrkensia.go) | Out-Null
     # Release
-    if (Test-Path ../build/$filename -PathType Leaf) {
-        $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath "../build/$filename").Hash.ToLower()
+    if (Test-Path build/$filename -PathType Leaf) {
+        $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath "build/$filename").Hash.ToLower()
         $releaseText += "* ``$filename``: $hash`n"
     }
-    Set-Location ..
 }
 Clear-Host
 Write-Output $releaseText

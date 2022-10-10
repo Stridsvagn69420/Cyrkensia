@@ -1,1 +1,0 @@
-See the [Wiki](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation) for more.
