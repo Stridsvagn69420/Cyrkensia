@@ -13,7 +13,8 @@ func AgplHeaders(c *fiber.Ctx) error {
 
 func ServerHeader(c *fiber.Ctx) error {
 	c.Set("Server", "Cyrkensia/"+AppVersion+" Fiber/"+fiber.Version)
+	c.Set("Access-Control-Allow-Private-Network", "true")
 	return c.Next()
 }
 
-var AppVersion string = "1.1.0"
+var AppVersion string = "1.2.0"

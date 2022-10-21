@@ -2,12 +2,12 @@ package server
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path"
 	"strconv"
 
-	"github.com/Stridsvagn69420/Cyrkensia/go/src/utils"
+	"github.com/Stridsvagn69420/Cyrkensia/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -55,7 +55,7 @@ func HostinfoEndpoint(c *fiber.Ctx) error {
 
 // Hostinfo specific IO functions for reading out available songs and albums
 func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
-	files, err := ioutil.ReadDir(pathdir)
+	files, err := os.ReadDir(pathdir)
 	if err != nil {
 		ServerError500(c, err)
 	}
@@ -84,7 +84,7 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 
 func readMetadata(c *fiber.Ctx, dirpath string) metadata {
 	var metadata metadata
-	file, err := ioutil.ReadFile(path.Join(dirpath, ".metadata.json"))
+	file, err := os.ReadFile(path.Join(dirpath, ".metadata.json"))
 	if err != nil {
 		ServerError500(c, err)
 	}
@@ -96,11 +96,23 @@ func readMetadata(c *fiber.Ctx, dirpath string) metadata {
 }
 
 func readFiles(c *fiber.Ctx, dirpath string, size *int) []string {
-	files, err := ioutil.ReadDir(dirpath)
-	musicfiles := make([]string, len(files)-1)
+	// Read files
+	entries, err := os.ReadDir(dirpath)
 	if err != nil {
 		ServerError500(c, err)
 	}
+	// Get file info
+	files := make([]fs.FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			ServerError500(c, err)
+		}
+		files = append(files, info)
+	}
+
+	// Parse metadata
+	musicfiles := make([]string, len(files)-1)
 	for i, file := range files {
 		if !file.IsDir() && file.Name() != ".metadata.json" {
 			*size += int(file.Size())

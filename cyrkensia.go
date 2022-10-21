@@ -2,15 +2,17 @@ package main
 
 import (
 	"flag"
+	"os"
 	"path/filepath"
 	"strconv"
 
-	"github.com/Stridsvagn69420/Cyrkensia/go/src/server"
-	"github.com/Stridsvagn69420/Cyrkensia/go/src/utils"
+	"github.com/Stridsvagn69420/Cyrkensia/server"
+	"github.com/Stridsvagn69420/Cyrkensia/utils"
 
 	"github.com/Stridsvagn69420/pringo"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
@@ -40,17 +42,26 @@ func main() {
 		if err := server.InitHtpasswdAuth(utils.Config.Access); err != nil {
 			utils.Prnt.Println("An error occured while initializing HTTP-Basic Auth!", pringo.Red)
 			utils.Prnt.Println("WARNING: Authorization will be disabled...", pringo.Yellow)
-			utils.Config.Locked = false
+			os.Exit(1)
 		}
 	}
 	app := fiber.New()
+	// Middleware
 	app.Use(logger.New(logger.Config{
 		Format:     "[${ip}]:${port} ${status} - ${method} ${path}\n",
 		TimeZone:   "UTC",
 		TimeFormat: "2006-01-02 15:04:05",
 	}))
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowHeaders:     "Origin, Content-Type, Accept, DNT, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Range, Content-Length, Accept-Language, Accept-Encoding, Connection, Access-Control-Allow-Origin",
+		AllowCredentials: true,
+		AllowMethods:     "GET, HEAD, OPTIONS",
+		ExposeHeaders:    "Content-Length, Content-Range",
+	}))
 	app.Use(server.AgplHeaders)
 	app.Use(server.ServerHeader)
+
 	// Routes
 	app.Get("/", server.HostinfoEndpoint)
 	app.Get("/:route", server.RouteEndpoint)
