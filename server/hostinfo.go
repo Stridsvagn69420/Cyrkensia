@@ -22,16 +22,32 @@ type Hostinfo struct {
 	OriginURI string  `json:"originURI"`
 	Albums    []Album `json:"albums"`
 }
+
 type Album struct {
-	Cover string   `json:"cover"`
-	Dir   string   `json:"dir"`
-	Name  string   `json:"name"`
-	Files []string `json:"files"`
+	Cover   string   `json:"cover"`
+	Dir     string   `json:"dir"`
+	Name    string   `json:"name"`
+	Files   []string `json:"files"`
+	Authors []Author `json:"authors"`
 }
 
 type metadata struct {
-	Name  string `json:"name"`
-	Cover string `json:"cover"`
+	Name    string   `json:"name"`
+	Cover   string   `json:"cover"`
+	Authors []Author `json:"authors"`
+}
+
+type Owner struct {
+	Name    string `json:"name"`
+	Website string `json:"website"`
+	Email   string `json:"email"`
+}
+
+type Author struct {
+	Name    string   `json:"name"`
+	Website string   `json:"website"`
+	Email   string   `json:"email"`
+	Songs   []string `json:"songs"`
 }
 
 func HostinfoEndpoint(c *fiber.Ctx) error {
@@ -79,10 +95,11 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 			if _, finderr := os.Stat(path.Join(albumpath, ".metadata.json")); finderr == nil {
 				meta := readMetadata(c, albumpath)
 				album := Album{
-					Name:  meta.Name,
-					Dir:   file.Name(),
-					Cover: meta.Cover,
-					Files: readFiles(c, albumpath, &size),
+					Name:    meta.Name,
+					Dir:     file.Name(),
+					Cover:   meta.Cover,
+					Files:   readFiles(c, albumpath, &size),
+					Authors: meta.Authors,
 				}
 				albums = append(albums, album)
 			}
