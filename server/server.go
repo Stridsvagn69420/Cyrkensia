@@ -13,25 +13,37 @@ import (
 )
 
 func FileServer(c *fiber.Ctx) error {
+	// Get directory
 	directory, err := url.QueryUnescape(c.Params("directory"))
 	if err != nil {
 		return ServerError500(c, err)
 	}
+
+	// Get filename
 	file, err := url.QueryUnescape(c.Params("file"))
 	if err != nil {
 		return ServerError500(c, err)
 	}
+
+	// Create filepath
 	filePath := filepath.Join(utils.Config.CDNpath, directory, file)
+
+	// Send file if it exists
 	return sendIfExists(c, filePath)
 }
 
 func FileServerLocked(c *fiber.Ctx) error {
+	// Check Authorization header
 	userpass := c.GetReqHeaders()["Authorization"]
 	if userpass == "" {
 		return AuthError401(c)
 	}
+
+	// Decode base64 value
 	decodedBytes, err := base64.StdEncoding.DecodeString(userpass[6:])
 	ServerError500(c, err)
+
+	// Parse decoded values
 	decoded := strings.Split(string(decodedBytes), ":")
 	if len(decoded) != 2 {
 		return AuthError401(c)

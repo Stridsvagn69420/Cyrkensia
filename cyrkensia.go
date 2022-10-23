@@ -17,6 +17,19 @@ import (
 )
 
 func main() {
+	// Info and Help message
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "info", "version", "-V", "--version":
+			InfoMessage()
+			os.Exit(0)
+
+		case "help", "-h", "--help":
+			HelpMessage()
+			os.Exit(0)
+		}
+	}
+
 	// ------ Flags ------
 	configPath := flag.String("Config", filepath.Join(utils.GetHomeDir(), ".config/cyrkensia/config.json"), "Config file location")
 	// Listening address and port and file directory

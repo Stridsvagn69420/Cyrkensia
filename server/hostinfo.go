@@ -44,26 +44,38 @@ func HostinfoEndpoint(c *fiber.Ctx) error {
 		Root:      "",
 		OriginURI: c.Protocol() + "://" + c.Hostname() + c.Path(),
 	}
+
+	// Append dynamic fields
 	hostinfo.Albums, hostinfo.Size = readAlbums(c, utils.Config.CDNpath)
-	// send hostinfo response
+
+	// Convert to JSON
 	json, err := json.Marshal(hostinfo)
 	ServerError500(c, err)
+	// Set Headers
 	c.Append("Content-Type", fiber.MIMEApplicationJSON)
 	c.Append("Content-Length", strconv.Itoa(len(json)))
+
+	// Send JSON response
 	return c.Status(fiber.StatusOK).Send(json)
 }
 
 // Hostinfo specific IO functions for reading out available songs and albums
 func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
+	// Read files
 	files, err := os.ReadDir(pathdir)
 	if err != nil {
 		ServerError500(c, err)
 	}
+
+	// Vars
 	size := 0
 	var albums []Album
+
+	// Read directories
 	for _, file := range files {
 		if file.IsDir() {
 			albumpath := path.Join(pathdir, file.Name())
+			// Extract metadata
 			if _, finderr := os.Stat(path.Join(albumpath, ".metadata.json")); finderr == nil {
 				meta := readMetadata(c, albumpath)
 				album := Album{
@@ -79,19 +91,26 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 	if len(albums) == 0 {
 		albums = make([]Album, 0)
 	}
+
+	// Return albums and size
 	return albums, size
 }
 
 func readMetadata(c *fiber.Ctx, dirpath string) metadata {
 	var metadata metadata
+	// Read metadata
 	file, err := os.ReadFile(path.Join(dirpath, ".metadata.json"))
 	if err != nil {
 		ServerError500(c, err)
 	}
+
+	// Parse JSON
 	err = json.Unmarshal(file, &metadata)
 	if err != nil {
 		ServerError500(c, err)
 	}
+
+	// Retunr metadata
 	return metadata
 }
 
@@ -119,5 +138,7 @@ func readFiles(c *fiber.Ctx, dirpath string, size *int) []string {
 			musicfiles[i-1] = file.Name()
 		}
 	}
+
+	// Return music files
 	return musicfiles
 }
