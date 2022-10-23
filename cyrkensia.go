@@ -8,7 +8,6 @@ import (
 
 	"github.com/Stridsvagn69420/Cyrkensia/server"
 	"github.com/Stridsvagn69420/Cyrkensia/utils"
-
 	"github.com/Stridsvagn69420/pringo"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,7 +15,34 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
+const BindDesc string = "IP address to bind to"
+const PortDesc string = "Port to listen on"
+const FilesDesc string = "Folder holding all the audio files"
+const NameDesc string = "Name to represent the server"
+const IconDesc string = "Icon key to represent the server"
+const UuidDesc string = "UUIDv4 of the server"
+const HtpasswdDesc string = "Path to htpasswd file for password protection"
+const PemDesc string = "Path to the PEM file. Only needed for HTTPS."
+const KeyDesc string = "Path to the KEY file. Only needed for HTTPS."
+const ConfigDesc string = "Config file location"
+
+var cfgpath string = filepath.Join(utils.GetHomeDir(), ".config/cyrkensia/config.json")
+
+const BindName string = "Bind"
+const PortName string = "Port"
+const FilesName string = "Files"
+const NameName string = "Name"
+const IconName string = "Icon"
+const UuidName string = "Uuid"
+const HtpasswdName string = "Htpasswd"
+const PemName string = "Pem"
+const KeyName string = "Key"
+const ConfigName string = "Config"
+
 func main() {
+	// Load default config
+	utils.LoadConfig(cfgpath)
+
 	// Info and Help message
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
@@ -31,22 +57,22 @@ func main() {
 	}
 
 	// ------ Flags ------
-	configPath := flag.String("Config", filepath.Join(utils.GetHomeDir(), ".config/cyrkensia/config.json"), "Config file location")
+	configPath := flag.String("Config", cfgpath, ConfigDesc)
 	// Listening address and port and file directory
-	flag.StringVar(&utils.Config.BindAddr, "Bind", utils.Config.BindAddr, "IP address to bind to")
-	flag.IntVar(&utils.Config.Port, "Port", utils.Config.Port, "Port to listen on")
-	flag.StringVar(&utils.Config.CDNpath, "Files", utils.Config.CDNpath, "Folder holding all the audio files")
+	flag.StringVar(&utils.Config.BindAddr, BindName, utils.Config.BindAddr, BindDesc)
+	flag.IntVar(&utils.Config.Port, PortName, utils.Config.Port, PortDesc)
+	flag.StringVar(&utils.Config.CDNpath, FilesName, utils.Config.CDNpath, FilesDesc)
 	// Appearance and UUID
-	flag.StringVar(&utils.Config.Name, "Name", utils.Config.Name, "Name to represent the server")
-	flag.StringVar(&utils.Config.Icon, "Icon", utils.Config.Icon, "Icon key to represent the server")
-	flag.StringVar(&utils.Config.Uuid, "Uuid", utils.Config.Uuid, "UUID")
+	flag.StringVar(&utils.Config.Name, NameName, utils.Config.Name, NameDesc)
+	flag.StringVar(&utils.Config.Icon, IconName, utils.Config.Icon, IconDesc)
+	flag.StringVar(&utils.Config.Uuid, UuidName, utils.Config.Uuid, UuidDesc)
 	// User access and HTTPS
-	flag.StringVar(&utils.Config.Access, "Htpasswd", utils.Config.Access, "Path to htpasswd file for password protection")
-	flag.StringVar(&utils.Config.Pem, "Pem", utils.Config.Pem, "Path to the PEM file. Only needed for HTTPS.")
-	flag.StringVar(&utils.Config.Key, "Key", utils.Config.Key, "Path to the KEY file. Only needed for HTTPS.")
-	flag.Parse()
+	flag.StringVar(&utils.Config.Access, HtpasswdName, utils.Config.Access, HtpasswdDesc)
+	flag.StringVar(&utils.Config.Pem, PemName, utils.Config.Pem, PemDesc)
+	flag.StringVar(&utils.Config.Key, KeyName, utils.Config.Key, KeyDesc)
 
-	// ------ Config ------
+	// Parse flags and load config
+	flag.Parse()
 	utils.LoadConfig(*configPath)
 
 	// ------ Server ------
@@ -54,7 +80,7 @@ func main() {
 	if utils.Config.Locked {
 		if err := server.InitHtpasswdAuth(utils.Config.Access); err != nil {
 			utils.Prnt.Println("An error occured while initializing HTTP-Basic Auth!", pringo.Red)
-			utils.Prnt.Println("WARNING: Authorization will be disabled...", pringo.Yellow)
+			utils.Prnt.Println("WARNING: Server will shut down!", pringo.Yellow)
 			os.Exit(1)
 		}
 	}

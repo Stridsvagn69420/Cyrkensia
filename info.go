@@ -9,11 +9,11 @@ import (
 )
 
 // Printer
-var i1color pringo.Color = pringo.MagentaBright
-var i2color pringo.Color = pringo.Magenta
+var color1 pringo.Color = pringo.MagentaBright
+var color2 pringo.Color = pringo.Magenta
 
 func InfoMessage() {
-	utils.Prnt.Println("Cyrkensia - Server for Azura and Shigure music repositories", i1color)
+	utils.Prnt.Println("Cyrkensia - Server for Azura and Shigure music repositories", color1)
 	info("Repository", server.SourceCode)
 	info("License", server.License)
 	info("Version", server.AppVersion)
@@ -23,6 +23,6 @@ func InfoMessage() {
 }
 
 func info(x string, y string) {
-	utils.Prnt.Print(x+": ", i2color)
+	utils.Prnt.Print(x+": ", color2)
 	utils.Prnt.Writeln(y)
 }
