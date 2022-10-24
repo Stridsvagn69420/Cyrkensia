@@ -4,6 +4,15 @@ version = "1.2.0"
 edition = "2021"
 license = "EUPL-1.2"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+
+
+[[bin]]
+name = "cyrkensia"
+path = "src/bin/cyrkensia.rs"
+required-features = []
+
+[[bin]]
+name = "cyrkensia-cfg"
+path = "src/bin/cyrkensia-cfg.rs"
+required-features = []

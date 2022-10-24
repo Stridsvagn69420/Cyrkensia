@@ -1,0 +1,1 @@
+// TODO: Add description here and Album datatype
