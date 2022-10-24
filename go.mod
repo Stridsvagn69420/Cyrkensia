@@ -3,7 +3,6 @@ module github.com/Stridsvagn69420/Cyrkensia
 go 1.17
 
 require (
-	github.com/Stridsvagn69420/Cyrkensia/go/src v0.0.0-20220830220806-454d5777eee6
 	github.com/Stridsvagn69420/pringo v0.9.1
 	github.com/gofiber/fiber/v2 v2.38.1
 	github.com/tg123/go-htpasswd v1.2.0
