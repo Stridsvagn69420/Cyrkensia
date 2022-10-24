@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -25,7 +24,7 @@ func FileExists(path string) bool {
 }
 
 func ListFiles(path string) []string {
-	files, _ := ioutil.ReadDir(path)
+	files, _ := os.ReadDir(path)
 	var fileList []string
 	for _, f := range files {
 		if !strings.HasPrefix(f.Name(), ".") && !f.IsDir() {

@@ -12,53 +12,22 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type Hostinfo struct {
-	Name      string  `json:"name"`
-	Hosticon  string  `json:"hosticon"`
-	Uuid      string  `json:"uuid"`
-	Secured   bool    `json:"secured"`
-	Size      int     `json:"size"`
-	Root      string  `json:"root"`
-	OriginURI string  `json:"originURI"`
-	Albums    []Album `json:"albums"`
-}
-
-type Album struct {
-	Cover   string   `json:"cover"`
-	Dir     string   `json:"dir"`
-	Name    string   `json:"name"`
-	Files   []string `json:"files"`
-	Authors []Author `json:"authors"`
-}
-
 type metadata struct {
-	Name    string   `json:"name"`
-	Cover   string   `json:"cover"`
-	Authors []Author `json:"authors"`
-}
-
-type Owner struct {
-	Name    string `json:"name"`
-	Website string `json:"website"`
-	Email   string `json:"email"`
-}
-
-type Author struct {
-	Name    string   `json:"name"`
-	Website string   `json:"website"`
-	Email   string   `json:"email"`
-	Songs   []string `json:"songs"`
+	Name    string         `json:"name"`
+	Cover   string         `json:"cover"`
+	Authors []utils.Author `json:"authors"`
 }
 
 func HostinfoEndpoint(c *fiber.Ctx) error {
 	// Generate hostinfo
-	hostinfo := Hostinfo{
+	hostinfo := utils.Hostinfo{
 		Name:      utils.Config.Name,
 		Hosticon:  utils.Config.Icon,
 		Uuid:      utils.Config.Uuid,
 		Secured:   utils.Config.Locked,
 		Root:      "",
 		OriginURI: c.Protocol() + "://" + c.Hostname() + c.Path(),
+		Owners:    utils.Config.Owners,
 	}
 
 	// Append dynamic fields
@@ -76,7 +45,7 @@ func HostinfoEndpoint(c *fiber.Ctx) error {
 }
 
 // Hostinfo specific IO functions for reading out available songs and albums
-func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
+func readAlbums(c *fiber.Ctx, pathdir string) ([]utils.Album, int) {
 	// Read files
 	files, err := os.ReadDir(pathdir)
 	if err != nil {
@@ -85,7 +54,7 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 
 	// Vars
 	size := 0
-	var albums []Album
+	var albums []utils.Album
 
 	// Read directories
 	for _, file := range files {
@@ -94,7 +63,7 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 			// Extract metadata
 			if _, finderr := os.Stat(path.Join(albumpath, ".metadata.json")); finderr == nil {
 				meta := readMetadata(c, albumpath)
-				album := Album{
+				album := utils.Album{
 					Name:    meta.Name,
 					Dir:     file.Name(),
 					Cover:   meta.Cover,
@@ -106,7 +75,7 @@ func readAlbums(c *fiber.Ctx, pathdir string) ([]Album, int) {
 		}
 	}
 	if len(albums) == 0 {
-		albums = make([]Album, 0)
+		albums = make([]utils.Album, 0)
 	}
 
 	// Return albums and size
