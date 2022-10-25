@@ -1,14 +1,30 @@
 // TODO: Add description here and instructions for using the library
 
+/// Owner struct
+mod owner;
+pub use self::owner::Owner;
 
+/// Config struct
+mod config;
+pub use self::config::Config;
 
+/// Metadata struct
+mod metadata;
+pub use self::metadata::Metadata;
 
-// TODO: Add exports (*.rs files)
+/// Artist struct
+mod artist;
+pub use self::artist::Artist;
 
+/// Album struct
+mod album;
+pub use self::album::Album;
 
+/// Hostinfo struct
+mod hostinfo;
+pub use self::hostinfo::Hostinfo;
 
-
-/// Metadata about Cyrkensia
+/// Meta about Cyrkensia
 /// 
 /// This little module just contains information about this crate.
 pub mod meta {
