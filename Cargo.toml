@@ -1,18 +1,58 @@
 [package]
 name = "cyrkensia"
+description = "Server for Azura and Shigure music repositories"
 version = "1.2.0"
 edition = "2021"
 license = "EUPL-1.2"
+readme = "README.md"
+build = "build.rs"
+repository = "https://github.com/Stridsvagn69420/Cyrkensia"
+homepage = "https://github.com/Stridsvagn69420/Cyrkensia"
+documentation = "https://docs.rs/cyrkensia"
+categories = []
+keywords = []
 
 [dependencies]
+# Main crate
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+# Server only
+actix-web = { version = "4", optional = true, features = ["rustls"] }
+actix-cors = { version = "0.6", optional = true}
 
+[features]
+# Default
+default = ["meta", "server"]
+# Metadata
+meta = ["serde"]
+# Webserver
+server = ["actix-web", "actix-cors"]
+
+[build-dependencies]
+chrono = "0.4"
 
 [[bin]]
 name = "cyrkensia"
 path = "src/bin/cyrkensia.rs"
-required-features = []
+required-features = ["server", "meta"]
 
 [[bin]]
 name = "cyrkensia-cfg"
 path = "src/bin/cyrkensia-cfg.rs"
-required-features = []
+required-features = ["meta"]
+
+[profile.release]
+lto = true
+strip = true
+debug = true
+
+[package.metadata.docs.rs]
+targets = [
+	"x86_64-unknown-linux-gnu",
+	"x86_64-pc-windows-msvc",
+	"x86_64-pc-windows-gnu",
+	"aarch64-unknown-linux-gnu",
+	"x86_64-unknown-openbsd",
+	"x86_64-unknown-freebsd",
+	"x86_64-apple-darwin"
+]
