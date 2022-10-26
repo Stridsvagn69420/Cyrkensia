@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
-use super::Artist;
+use std::cmp::PartialEq;
+use super::{Artist, add_vec, remove_vec};
 
 /// Album
 /// 
@@ -24,7 +25,7 @@ pub struct Album {
     /// Artists
     /// 
     /// The Artists of the album.
-    pub authors: Vec<Artist>,
+    pub artists: Vec<Artist>,
 
     /// Files
     /// 
@@ -32,4 +33,65 @@ pub struct Album {
     pub files: Vec<String>
 }
 
-// TODO: Add trait impls and useful functions here
+impl Album {
+    /// New Album
+    /// 
+    /// Creates a new album. If `artists` or `files` is [None], an empty array will be created for them.
+    pub fn new(name: String, cover: String, path: String, artists: Option<Vec<Artist>>, files: Option<Vec<String>>) -> Album {
+        Album {
+            name,
+            cover,
+            path,
+            artists: match artists {
+                Some(x) => x,
+                None => Vec::new()
+            },
+            files: match files {
+                Some(x) => x,
+                None => Vec::new()
+            }
+        }
+    }
+
+    /// Add [Artist]
+    /// 
+    /// Adds an [Artist] to the album if they don't exist already.
+    pub fn add_artist(&mut self, art: Artist) -> &mut Album {
+        add_vec(&mut self.artists, art);
+        self
+    }
+
+    /// Add file
+    /// 
+    /// Adds a file to the album if it doesn't exist already.
+    pub fn add_file(&mut self, file: String) -> &mut Album {
+        add_vec(&mut self.files, file);
+        self
+    }
+
+    /// Remove [Artist]
+    /// 
+    /// Removes an [Artist] from the album if they already exist.
+    pub fn remove_artist(&mut self, art: Artist) -> &mut Album {
+        remove_vec(&mut self.artists, art);
+        self
+    }
+
+    /// Remove file
+    /// 
+    /// Removes a file from the album if it already exists.
+    pub fn remove_file(&mut self, file: String) -> &mut Album {
+        remove_vec(&mut self.files, file);
+        self
+    }
+}
+
+impl PartialEq for Album {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name &&
+        self.cover == other.cover &&
+        self.path == other.path &&
+        self.artists == other.artists &&
+        self.files == other.files
+    }
+}

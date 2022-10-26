@@ -18,7 +18,7 @@ pub struct Owner {
     /// Website
     /// 
     /// The website or profile of an owner. This is optional.
-    pub website: String
+    pub website: Option<String>
 }
 
 // TODO: Add traits and other useful functions here
