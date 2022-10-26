@@ -1,6 +1,10 @@
+use std::cmp::PartialEq;
+
+
+
 // TODO: Add description here and instructions for using the library
 
-use std::cmp::PartialEq;
+
 
 /// Owner struct
 mod owner;

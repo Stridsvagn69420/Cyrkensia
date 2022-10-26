@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 use std::cmp::PartialEq;
-use super::{Artist, add_vec, remove_vec};
+use std::convert::From;
+use super::{Artist, Metadata, add_vec, remove_vec};
 
 /// Album
 /// 
@@ -83,6 +84,18 @@ impl Album {
     pub fn remove_file(&mut self, file: String) -> &mut Album {
         remove_vec(&mut self.files, file);
         self
+    }
+}
+
+impl From<Metadata> for Album {
+    fn from(x: Metadata) -> Album {
+        Album {
+            name: x.name,
+            cover: x.cover,
+            path: "".to_string(),
+            artists: x.artists,
+            files: Vec::new()
+        }
     }
 }
 
