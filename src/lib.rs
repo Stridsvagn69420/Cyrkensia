@@ -12,11 +12,10 @@
 //! If you're searching for Cyrkensia as a binary, see the [crates.io](https://crates.io/crates/cyrkensia) or [GitHub](https://github.com/Stridsvagn69420/Cyrkensia) page for more.
 //! 
 //! ## Features
-//! By default, both the `meta` and the `server` features are enabled. The latter is only relevant for people who write a custom Cyrkensia server.
-//! The `meta` feature exposes the custom structs used in this project and is probably what you want. You can disable `server` and enable `meta` with this:
-//! 
+//! By default, the `server` feature is enabled. The latter is only relevant for people who write a custom Cyrkensia server.
+//! You can disable `server` with this:
 //! ```toml
-//! cyrkensia = { version = "1", default-features = false, features = ["meta"] }
+//! cyrkensia = { version = "1", default-features = false }
 //! ```
 //! 
 //! ## Examples
@@ -66,6 +65,7 @@ pub mod meta {
     pub const VERSION: &str = env!("CARGO_PKG_VERSION");
     pub const NAME: &str = env!("CARGO_PKG_NAME");
     pub const NAME_RICH: &str = "Cyrkensia";
+    pub const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
     pub const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
     pub const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
     pub const LICENSE: &str = "EUPL-1.2";
@@ -82,10 +82,11 @@ pub mod meta {
     );
 }
 
+#[cfg(feature = "server")]
 /// Server Routes
 /// 
-/// This submodule (only visible locally) contains routes and other tools needed only for the Cyrkensia server.
-pub(crate) mod server;
+/// This submodule contains routes and other tools needed only for the Cyrkensia server.
+pub mod server;
 
 /// Remove from [Vec]
 /// 
