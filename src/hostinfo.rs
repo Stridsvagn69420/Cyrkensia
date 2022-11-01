@@ -1,9 +1,10 @@
 use serde::{Serialize, Deserialize};
 use std::cmp::PartialEq;
 use std::convert::From;
+use std::ffi::OsString;
 use std::io;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use super::{Owner, Album, Config, Metadata};
 
 /// Hostinfo
@@ -53,6 +54,13 @@ pub struct Hostinfo {
 }
 
 impl Hostinfo {
+    /// Set Origin
+    /// 
+    /// Sets the origin of the Hostinfo. This function solely exists to remind library users to swap out the empty default origin.
+    pub fn set_origin(&mut self, org: String) {
+        self.origin = org
+    }
+
     /// Generate empty Hostinfo
     /// 
     /// Generates an empty Hostinfo.
@@ -69,25 +77,21 @@ impl Hostinfo {
         }
     }
 
-
     /// Generate Hostinfo
     /// 
     /// Generates a Hostinfo based on a [Config].
     pub fn generate(cfg: Config) -> io::Result<Hostinfo> {
         let albums = Hostinfo::read_albums(cfg.root.as_str())?;
         let mut hostinfo = Hostinfo::from(cfg);
-        hostinfo.albums = albums.0;
-        hostinfo.size = albums.1;
+        hostinfo.size = albums.iter().map(|x| x.size).sum();
+        hostinfo.albums = albums;
         Ok(hostinfo)
     }
 
     /// Read Albums
     /// 
-    /// Reads a given directory and returns it as a [Vec] of [Album]s
-    pub fn read_albums(path: impl AsRef<Path>) -> io::Result<(Vec<Album>, u128)> {
-        // Total Size of Albums
-        let mut totsize: u128 = 0;
-
+    /// Reads a given directory and returns it as a [Vec] of [Album]s.
+    pub fn read_albums(path: impl AsRef<Path>) -> io::Result<Vec<Album>> {
         // Read given Cyrkensia root
         let albums: Vec<Album> = fs::read_dir(path.as_ref())?
 
@@ -103,35 +107,37 @@ impl Hostinfo {
 
         // Create Album instances
         .filter_map(|y| {
-            // Load Metadata
-            if let Ok(meta) = Metadata::load(y.0.join(".metadata.json")) {
-
-                // Just for safety. Safely converts the OsString to a String.
-                if let Some(fname) = y.1.to_str() {
-
-                    // Read files and total size
-                    if let Ok(res) = Hostinfo::list_files(fname) {
-
-                        // Add size and return Album
-                        totsize += res.1;
-                        return Some(Album {
-                            name: meta.name,
-                            cover: meta.cover,
-                            path: fname.to_string(),
-                            artists: meta.artists,
-                            files: res.0
-                        });
-                    }  
-                }
-            }
-            None
+            Hostinfo::parse_album(&y.0, &y.1).ok()
         })
 
         // Collect and Return
         .collect();
-        Ok((albums, totsize))
+        Ok(albums)
     }
 
+    /// Parse album
+    /// 
+    /// This is a wrapper for the second `.filter_map()` in [read_albums](Hostinfo::read_albums) since clojures don't allow the `?`.
+    /// You can of course also use it if you desire.
+    pub fn parse_album(path: &PathBuf, name: &OsString) -> io::Result<Album> {
+        if let Some(fname) = name.to_str() {
+            // Read data
+            let m = Metadata::load(path.join(".metadata.json"))?;
+            let c = Hostinfo::list_files(path)?;
+
+            // Create Album
+            return Ok(Album {
+                name: m.name,
+                cover: m.cover,
+                artists: m.artists,
+                path: fname.to_string(),
+                files: c.0,
+                size: c.1,
+            });
+        }
+        // Return NotFound error by default
+        Err(io::Error::new(io::ErrorKind::NotFound, "The OsString could not be parsed to a String"))
+    }
 
     /// List files
     /// 
@@ -162,12 +168,16 @@ impl Hostinfo {
             None
         })
         
-        // Convert PathBuf to String
+        // Return only the filename and not the entire path
         .filter_map(|y| {
-            if let Ok(pathstr) = y.0.into_os_string().into_string() {
-                // Add filesize to total buffer
-                allsize += y.1 as u128;
-                return Some(pathstr);
+            if let Some(filename) = y.0.file_name() {
+                if let Some(fname) = filename.to_str() {  
+                    // Filter out dotfiles  
+                    if !fname.starts_with('.') {
+                        allsize += y.1 as u128;
+                        return Some(fname.to_string());
+                    }
+                }
             }
             None
         })

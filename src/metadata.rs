@@ -29,8 +29,6 @@ pub struct Metadata {
     pub artists: Vec<Artist>
 }
 
-// TODO: Add trait impls and other functions
-
 impl Metadata {
     /// New Metadata
     /// 

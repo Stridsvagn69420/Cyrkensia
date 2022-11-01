@@ -31,14 +31,19 @@ pub struct Album {
     /// Files
     /// 
     /// All files present in the album as a relative path.
-    pub files: Vec<String>
+    pub files: Vec<String>,
+
+    /// Size
+    /// 
+    /// The size of the Album.
+    pub size: u128
 }
 
 impl Album {
     /// New Album
     /// 
     /// Creates a new album. If `artists` or `files` is [None], an empty array will be created for them.
-    pub fn new(name: String, cover: String, path: String, artists: Option<Vec<Artist>>, files: Option<Vec<String>>) -> Album {
+    pub fn new(name: String, cover: String, path: String, artists: Option<Vec<Artist>>, files: Option<Vec<String>>, size: u128) -> Album {
         Album {
             name,
             cover,
@@ -50,7 +55,8 @@ impl Album {
             files: match files {
                 Some(x) => x,
                 None => Vec::new()
-            }
+            },
+            size
         }
     }
 
@@ -94,7 +100,8 @@ impl From<Metadata> for Album {
             cover: x.cover,
             path: "".to_string(),
             artists: x.artists,
-            files: Vec::new()
+            files: Vec::new(),
+            size: 0
         }
     }
 }
@@ -105,6 +112,7 @@ impl PartialEq for Album {
         self.cover == other.cover &&
         self.path == other.path &&
         self.artists == other.artists &&
-        self.files == other.files
+        self.files == other.files &&
+        self.size == other.size
     }
 }

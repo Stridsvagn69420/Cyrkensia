@@ -1,10 +1,39 @@
+//! # Cyrkensia
+//! ![Build (Windows)](https://github.com/Stridsvagn69420/Cyrkensia/actions/workflows/build-windows.yml/badge.svg?branch=master)
+//! ![Build (Linux)](https://github.com/Stridsvagn69420/Cyrkensia/actions/workflows/build-linux.yml/badge.svg?branch=master)
+//! ![Clippy](https://github.com/Stridsvagn69420/Cyrkensia/actions/workflows/cargo-clippy.yml/badge.svg?branch=master)
+//! ![docs.rs](https://docs.rs/cyrkensia/badge.svg)
+//! ![Version](https://img.shields.io/crates/v/cyrkensia.svg)
+//! ![License](https://img.shields.io/crates/l/cyrkensia.svg)
+//! ![Stars](https://img.shields.io/github/stars/Stridsvagn69420/Cyrkensia.svg)
+//! ![Downloads](https://img.shields.io/crates/d/cyrkensia.svg)
+//! 
+//! NOTE: This documentation focuses on Cyrkensia as a library.
+//! If you're searching for Cyrkensia as a binary, see the [crates.io](https://crates.io/crates/cyrkensia) or [GitHub](https://github.com/Stridsvagn69420/Cyrkensia) page for more.
+//! 
+//! ## Features
+//! By default, both the `meta` and the `server` features are enabled. The latter is only relevant for people who write a custom Cyrkensia server.
+//! The `meta` feature exposes the custom structs used in this project and is probably what you want. You can disable `server` and enable `meta` with this:
+//! 
+//! ```toml
+//! cyrkensia = { version = "1", default-features = false, features = ["meta"] }
+//! ```
+//! 
+//! ## Examples
+//! 
+//! Reading a Config and generating its Hostinfo
+//! ```no_run
+//! use cyrkensia::{Hostinfo, Config};
+//! 
+//! // Load the config file
+//! let config = Config::load_file("config.json").unwrap();
+//! // Generate the corresponding Hostinfo
+//! let mut hostinfo = Hostinfo::generate(config).unwrap();
+//! // Optionally set the origin
+//! hostinfo.set_origin("https://foo.bar/my-hostinfo.json".to_string());
+//! ```
+
 use std::cmp::PartialEq;
-
-
-
-// TODO: Add description here and instructions for using the library
-
-
 
 /// Owner struct
 mod owner;
