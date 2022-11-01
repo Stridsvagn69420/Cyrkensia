@@ -1,5 +1,11 @@
 use serde::{Serialize, Deserialize};
-use super::Owner;
+use serde_json::from_str;
+use std::cmp::PartialEq;
+use std::convert::From;
+use std::io;
+use std::fs;
+use std::path::Path;
+use super::{Owner, Hostinfo};
 
 /// Configuration
 /// 
@@ -52,4 +58,49 @@ pub struct Config {
     pub owners: Vec<Owner>
 }
 
-// TODO: Add trait implementations and other useful functions to the struct
+impl Config {
+    /// Load Config File
+    /// 
+    /// Loads a config from a file in the filesystem.
+    pub fn load_file(path: impl AsRef<Path>) -> io::Result<Config> {
+        let rawfile = fs::read_to_string(path)?;
+        Ok(from_str(rawfile.as_str())?)
+    }
+
+    /// Load Config JSON
+    /// 
+    /// Loads a config from an already existing &[str].
+    pub fn load_json(data: &str) -> io::Result<Config> {
+        Ok(from_str(data)?)
+    }
+}
+
+impl From<Hostinfo> for Config {
+    fn from(x: Hostinfo) -> Config {
+        Config {
+            name: x.name,
+            root: "".to_string(),
+            uuid: x.uuid,
+            icon: x.icon,
+            htpasswd: None,
+            bindaddr: "".to_string(),
+            tlscert: None,
+            tlskey: None,
+            owners: x.owners
+        }
+    }
+}
+
+impl PartialEq for Config {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name &&
+        self.root == other.root &&
+        self.uuid == other.uuid &&
+        self.icon == other.icon &&
+        self.htpasswd == other.htpasswd &&
+        self.bindaddr == other.bindaddr &&
+        self.tlscert == other.tlscert &&
+        self.tlskey == other.tlskey &&
+        self.owners == other.owners
+    }
+}
