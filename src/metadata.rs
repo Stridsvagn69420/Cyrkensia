@@ -1,7 +1,11 @@
 use serde::{Serialize, Deserialize};
+use serde_json::from_str;
 use std::fmt::{Display, Result};
 use std::cmp::PartialEq;
 use std::convert::From;
+use std::path::Path;
+use std::fs;
+use std::io;
 use super::{Artist, Album, add_vec, remove_vec};
 
 /// .metdata.json
@@ -40,6 +44,14 @@ impl Metadata {
                 None => Vec::new()
             }
         }
+    }
+
+    /// Load .metadata.json
+    /// 
+    /// Loads a `.metadata.json` file into a [Metadata] instance.
+    pub fn load(path: impl AsRef<Path>) -> io::Result<Metadata> {
+        let data = fs::read_to_string(path)?;
+        Ok(from_str(data.as_str())?)
     }
 
     /// Add Artist
