@@ -97,12 +97,16 @@ impl Hostinfo {
 
         // Only use working entries and get directory path and name
         .filter_map(|x| {
-            if let Ok(dir) = x {
-                if dir.path().is_dir() {
-                    return Some((dir.path(), dir.file_name()));
-                }
+            // Try getting the DirEntry
+            let Ok(dir) = x else {
+                return None;
+            };
+            // Filter out non-dirs
+            if !dir.path().is_dir() {
+                return None;
             }
-            None
+            // Return path and filename
+            Some((dir.path(), dir.file_name()))
         })
 
         // Create Album instances
@@ -150,36 +154,39 @@ impl Hostinfo {
 
         // Only files and with successful metadata
         .filter_map(|x| {
-
             // Get successful DirEntries
-            if let Ok(entry) = x {
-
-                // Filter out non-files
-                if entry.path().is_file() {
-
-                    // Get successful Metadata
-                    if let Ok(fmeta) = entry.metadata() {
-
-                        // Return Path and Length
-                        return Some((entry.path(), fmeta.len()));
-                    }
-                }               
+            let Ok(entry) = x else {
+                return None;
+            };
+            // Filter out non-files
+            if !entry.path().is_file() {
+                return None;                
             }
-            None
+            // Get successful Metadata
+            let Ok(fmeta) = entry.metadata() else {
+                return None;
+            };
+            // Return Path and Length
+            Some((entry.path(), fmeta.len()))
         })
         
         // Return only the filename and not the entire path
         .filter_map(|y| {
-            if let Some(filename) = y.0.file_name() {
-                if let Some(fname) = filename.to_str() {  
-                    // Filter out dotfiles  
-                    if !fname.starts_with('.') {
-                        allsize += y.1 as u128;
-                        return Some(fname.to_string());
-                    }
-                }
+            // Get OS filename
+            let Some(filename) = y.0.file_name() else {
+                return None;
+            };
+            // Get filename as &str
+            let Some(fname) = filename.to_str() else {  
+                return  None;
+            };
+            // Filter out dotfiles  
+            if fname.starts_with('.') {
+                return None;
             }
-            None
+            // Append to size and return filename
+            allsize += y.1 as u128;
+            Some(fname.to_string())
         })
 
         // Collect to Vec<String> and return result
