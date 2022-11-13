@@ -7,7 +7,7 @@ use super::Artist;
 /// Owner
 /// 
 /// The datatype for Cyrkensia owners.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Owner {
     /// Name
     /// 

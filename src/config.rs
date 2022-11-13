@@ -10,7 +10,7 @@ use super::{Owner, Hostinfo};
 /// Configuration
 /// 
 /// The server configuration used for Cyrkensia.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     /// Name
     /// 
@@ -55,7 +55,13 @@ pub struct Config {
     /// Owners
     /// 
     /// List of repository [maintainers](Owner)
-    pub owners: Vec<Owner>
+    pub owners: Vec<Owner>,
+
+    /// Maximum Age
+    /// 
+    /// The maximum age of the [Hostinfo] in milliseconds as a [u32]. If [None], the Hostinfo will always be regenerated when its route is accessed.
+    /// This basically activates caching.
+    pub max_age: Option<u32>
 }
 
 impl Config {
@@ -86,7 +92,8 @@ impl From<Hostinfo> for Config {
             bindaddr: "".to_string(),
             tlscert: None,
             tlskey: None,
-            owners: x.owners
+            owners: x.owners,
+            max_age: None
         }
     }
 }
