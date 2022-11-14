@@ -81,7 +81,11 @@ impl Hostinfo {
     /// 
     /// Generates a Hostinfo based on a [Config].
     pub fn generate(cfg: Config) -> io::Result<Hostinfo> {
-        let albums = Hostinfo::read_albums(cfg.root.as_str())?;
+        let mut albums: Vec<Album> = Vec::new();
+        for rootpath in &cfg.root {
+            let album_slice = Hostinfo::read_albums(rootpath)?;
+            albums.extend(album_slice);
+        }
         let mut hostinfo = Hostinfo::from(cfg);
         hostinfo.size = albums.iter().map(|x| x.size).sum();
         hostinfo.albums = albums;

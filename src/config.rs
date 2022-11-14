@@ -17,10 +17,10 @@ pub struct Config {
     /// The display name of the repository.
     pub name: String,
 
-    /// File root
+    /// File roots
     /// 
-    /// The file root where all albums are stored.
-    pub root: String,
+    /// The file roots where all albums are stored. 
+    pub root: Vec<String>,
 
     /// UUIDv4
     /// 
@@ -85,7 +85,7 @@ impl From<Hostinfo> for Config {
     fn from(x: Hostinfo) -> Config {
         Config {
             name: x.name,
-            root: "".to_string(),
+            root: Vec::new(),
             uuid: x.uuid,
             icon: x.icon,
             htpasswd: None,
