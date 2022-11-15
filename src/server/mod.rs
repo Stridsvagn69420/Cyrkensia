@@ -43,7 +43,7 @@ pub struct CyrkensiaState {
 
     /// Last Hostinfo Update
     /// 
-    /// The [timestamp](Instant) when the [hostinfo] was last updated.
+    /// The [timestamp](Instant) when the [Hostinfo] was last updated.
     /// `.elapsed().as_secs()` will be used to compare it with the `max_age` in the [Config].
     /// Only used if caching is activated.
     pub last_updated: Mutex<Instant>

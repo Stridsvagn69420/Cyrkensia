@@ -86,7 +86,6 @@ pub mod meta {
 /// Server Routes
 /// 
 /// This submodule contains middlewares and other tools needed only for the Cyrkensia server.
-/// Note that the routes that Cyrkensia uses are directly in the `cyrkensia` binary due to technical obstacles.
 pub mod server;
 
 /// Remove from [Vec]
