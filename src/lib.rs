@@ -27,7 +27,7 @@
 //! // Load the config file
 //! let config = Config::load_file("config.json").unwrap();
 //! // Generate the corresponding Hostinfo
-//! let mut hostinfo = Hostinfo::generate(config).unwrap();
+//! let mut hostinfo = Hostinfo::generate(&config).unwrap();
 //! // Optionally set the origin
 //! hostinfo.set_origin("https://foo.bar/my-hostinfo.json".to_string());
 //! ```
