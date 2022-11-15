@@ -59,9 +59,9 @@ pub struct Config {
 
     /// Maximum Age
     /// 
-    /// The maximum age of the [Hostinfo] in milliseconds as a [u32]. If [None], the Hostinfo will always be regenerated when its route is accessed.
+    /// The maximum age of the [Hostinfo] in milliseconds as a [u64]. If [None], the Hostinfo will always be regenerated when its route is accessed.
     /// This basically activates caching.
-    pub max_age: Option<u32>
+    pub max_age: Option<u64>
 }
 
 impl Config {

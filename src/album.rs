@@ -6,7 +6,7 @@ use super::{Artist, Metadata, add_vec, remove_vec};
 /// Album
 /// 
 /// A struct representing an album of the Cyrkensia repository.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Album {
     /// Name
     /// 

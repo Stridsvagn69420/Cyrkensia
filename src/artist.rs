@@ -7,7 +7,7 @@ use super::{Owner, add_vec, remove_vec};
 /// Artist
 /// 
 /// A struct representing an author or artist of a song.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Artist {
     pub name: String,
 

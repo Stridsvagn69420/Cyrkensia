@@ -10,7 +10,7 @@ use super::{Owner, Album, Config, Metadata};
 /// Hostinfo
 /// 
 /// A struct representing the metadata or hostinfo and index of a Cyrkensia repository.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Hostinfo {
     /// Name
     /// 
@@ -80,13 +80,13 @@ impl Hostinfo {
     /// Generate Hostinfo
     /// 
     /// Generates a Hostinfo based on a [Config].
-    pub fn generate(cfg: Config) -> io::Result<Hostinfo> {
+    pub fn generate(cfg: &Config) -> io::Result<Hostinfo> {
         let mut albums: Vec<Album> = Vec::new();
         for rootpath in &cfg.root {
             let album_slice = Hostinfo::read_albums(rootpath)?;
             albums.extend(album_slice);
         }
-        let mut hostinfo = Hostinfo::from(cfg);
+        let mut hostinfo = Hostinfo::from(cfg.clone());
         hostinfo.size = albums.iter().map(|x| x.size).sum();
         hostinfo.albums = albums;
         Ok(hostinfo)
