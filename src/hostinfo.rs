@@ -5,7 +5,8 @@ use std::ffi::OsString;
 use std::io;
 use std::fs;
 use std::path::{Path, PathBuf};
-use super::{Owner, Album, Config, Metadata};
+use uuid::Uuid;
+use super::{Owner, Album, Config, Metadata, Artist};
 
 /// Hostinfo
 /// 
@@ -25,7 +26,7 @@ pub struct Hostinfo {
     /// UUID
     /// 
     /// The UUIDv4 of the repository.
-    pub uuid: String,
+    pub uuid: Uuid,
 
     /// Secured
     /// 
@@ -50,7 +51,12 @@ pub struct Hostinfo {
     /// Maintainers and Owners
     /// 
     /// List of all repository maintainers/owners.
-    pub owners: Vec<Owner>
+    pub owners: Vec<Owner>,
+
+    /// Featured Artists
+    /// 
+    /// List of all [Artist]s in this repository.
+    pub artists: Vec<Artist>
 }
 
 impl Hostinfo {
@@ -68,19 +74,20 @@ impl Hostinfo {
         Hostinfo {
             name: "".to_string(),
             icon: "".to_string(),
-            uuid: "".to_string(),
+            uuid: Uuid::new_v4(),
             secured: false,
             size: 0,
             origin: "".to_string(),
             albums: Vec::new(),
-            owners: Vec::new()
+            owners: Vec::new(),
+            artists: Vec::new()
         }
     }
 
     /// Generate Hostinfo
     /// 
     /// Generates a Hostinfo based on a [Config].
-    pub fn generate(cfg: &Config) -> io::Result<Hostinfo> {
+    pub fn generate(cfg: &Config, arts: &Vec<Artist>) -> io::Result<Hostinfo> {
         let mut albums: Vec<Album> = Vec::new();
         for rootpath in &cfg.root {
             let album_slice = Hostinfo::read_albums(rootpath)?;
@@ -89,6 +96,7 @@ impl Hostinfo {
         let mut hostinfo = Hostinfo::from(cfg.clone());
         hostinfo.size = albums.iter().map(|x| x.size).sum();
         hostinfo.albums = albums;
+        hostinfo.artists = arts.to_owned();
         Ok(hostinfo)
     }
 
@@ -128,23 +136,38 @@ impl Hostinfo {
     /// This is a wrapper for the second `.filter_map()` in [read_albums](Hostinfo::read_albums) since clojures don't allow the `?`.
     /// You can of course also use it if you desire.
     pub fn parse_album(path: &PathBuf, name: &OsString) -> io::Result<Album> {
-        if let Some(fname) = name.to_str() {
-            // Read data
-            let m = Metadata::load(path.join(".metadata.json"))?;
-            let c = Hostinfo::list_files(path)?;
+        let Some(fname) = name.to_str() else {
+            // Return NotFound error
+            return Err(io::Error::new(io::ErrorKind::NotFound, "The OsString could not be parsed to a String"));
+        };
 
-            // Create Album
-            return Ok(Album {
-                name: m.name,
-                cover: m.cover,
-                artists: m.artists,
-                path: fname.to_string(),
-                files: c.0,
-                size: c.1,
-            });
+        // Read data
+        let mut m = Metadata::load(path.join(".metadata.json"))?;
+        let c = Hostinfo::list_files(path)?;
+
+        // List files with default Artist
+        if let Some(defart) = m.default {
+            for file in c.0 {
+                if let Some(other_arts) = m.artists.get_mut(&file) {
+                    // Add default Artist to listed file if it's not included yet
+                    if other_arts.contains(&defart) {
+                        other_arts.push(defart);
+                    }
+                } else {
+                    // Append all yet unlisted files
+                    m.artists.insert(file, vec![defart]);
+                }
+            }
         }
-        // Return NotFound error by default
-        Err(io::Error::new(io::ErrorKind::NotFound, "The OsString could not be parsed to a String"))
+
+        // Create Album
+        Ok(Album {
+            name: m.name,
+            cover: m.cover,
+            path: fname.to_string(),
+            files: m.artists,
+            size: c.1,
+        })
     }
 
     /// List files
@@ -210,6 +233,7 @@ impl From<Config> for Hostinfo {
             origin: "".to_string(),
             albums: Vec::new(),
             owners: x.owners,
+            artists: Vec::new()
         }
     }
 }

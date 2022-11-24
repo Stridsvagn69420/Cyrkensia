@@ -5,6 +5,7 @@ use std::convert::From;
 use std::io;
 use std::fs;
 use std::path::Path;
+use uuid::Uuid;
 use super::{Owner, Hostinfo};
 
 /// Configuration
@@ -25,7 +26,7 @@ pub struct Config {
     /// UUIDv4
     /// 
     /// The UUID of the repository.
-    pub uuid: String,
+    pub uuid: Uuid,
 
     /// Icon
     /// 

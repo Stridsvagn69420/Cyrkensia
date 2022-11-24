@@ -1,12 +1,17 @@
 use serde::{Serialize, Deserialize};
+use uuid::Uuid;
 use std::fmt::{Display, Result};
 use std::cmp::PartialEq;
 use std::convert::From;
-use super::{Owner, add_vec, remove_vec};
+use std::path::{Path, PathBuf};
+use std::fs;
+use std::io;
+use super::Owner;
 
 /// Artist
 /// 
 /// A struct representing an author or artist of a song.
+/// An array of this is stored in a root of a Cyrkensia repository as a `.artists.json` file.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Artist {
     pub name: String,
@@ -16,60 +21,53 @@ pub struct Artist {
     /// The website of the artist.
     pub website: Option<String>,
 
-    /// Own music
+    /// Uuid
     /// 
-    /// List of files (music) that the artist made.
-    pub music: Vec<String>,
-
-    /// Features
-    /// 
-    /// List of files (music) that the artist was featured in.
-    pub features: Vec<String>
+    /// The artist's UUID
+    pub uuid: Uuid
 }
 
 impl Artist {
     /// New Artist
     /// 
     /// Creates a new Artist
-    pub fn new(name: String, website: Option<String>, music: Vec<String>, features: Vec<String>) -> Artist {
+    pub fn new(name: String, website: Option<String>, uuid: Uuid) -> Artist {
         Artist {
             name,
             website,
-            music,
-            features
+            uuid
         }
     }
 
-    /// Add music
+    /// Load single .artists.json
     /// 
-    /// Adds a new music entry if it doesn't exist already
-    pub fn add_music(&mut self, music: String) -> &mut Artist {
-        add_vec(&mut self.music, music);
-        self
+    /// Loads a single `.artists.json` as a [Vec] of [Artist]s
+    pub fn load_artists(path: impl AsRef<Path>) -> io::Result<Vec<Artist>> {
+        let rawdata = fs::read_to_string(path)?;
+        Ok(serde_json::from_str(rawdata.as_str())?)
     }
 
-    /// Add feature
+    /// Load multiple .artists.json
     /// 
-    /// Adds a new featured entry if it doesn't exist already
-    pub fn add_feature(&mut self, featured: String) -> &mut Artist {
-        add_vec(&mut self.features, featured);
-        self
+    /// Loads multiple `.artists.json` as a combined [Vec] of [Artist]s
+    pub fn load_multiple_artists(paths: Vec<impl AsRef<Path>>) -> io::Result<Vec<Artist>> {
+        let mut res: Vec<Artist> = Vec::new();
+        for pth in paths {
+            let artst = Artist::load_artists(pth)?;
+            res.extend(artst);
+        }
+        Ok(res)
     }
 
-    /// Remove music
+    /// Read multiple folders' .artists.json
     /// 
-    /// Removes a music entry if it exists
-    pub fn remove_music(&mut self, music: String) -> &mut Artist {
-        remove_vec(&mut self.music, music);
-        self
-    }
-
-    /// Remove feature
-    /// 
-    /// Removes a featured entry if it exists
-    pub fn remove_feature(&mut self, featured: String) -> &mut Artist {
-        remove_vec(&mut self.features, featured);
-        self
+    /// Reads the .artists.json of multiple folders. Essentially like [load_multiple_artists], but with `.artists.json` appended.
+    pub fn read_multiple(paths: &[String]) -> io::Result<Vec<Artist>> {
+        let conv_paths: Vec<PathBuf> = paths.iter()
+        .map(|x| Path::new(x).join(".artists.json")).collect();
+        
+        // Read all artists
+        Artist::load_multiple_artists(conv_paths)
     }
 }
 
@@ -78,8 +76,7 @@ impl From<Owner> for Artist {
         Artist {
             name: x.name,
             website: x.website,
-            music: Vec::new(),
-            features: Vec::new()
+            uuid: Uuid::new_v4()
         }
     }
 }
@@ -87,9 +84,9 @@ impl From<Owner> for Artist {
 impl Display for Artist {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result {
         if let Some(web) = self.website.clone() {
-            write!(f, "{} ({})", self.name, web)
+            write!(f, "{} ({}) {}", self.name, web, self.uuid)
         } else {
-            write!(f, "{}", self.name)
+            write!(f, "{} {}", self.name, self.uuid)
         }
     }
 }
@@ -98,7 +95,6 @@ impl PartialEq for Artist {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name &&
         self.website == other.website &&
-        self.music == other.music &&
-        self.features == other.features
+        self.uuid == other.uuid
     }
 }

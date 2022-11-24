@@ -1,12 +1,14 @@
 use serde::{Serialize, Deserialize};
 use serde_json::from_str;
+use uuid::Uuid;
+use std::collections::HashMap;
 use std::fmt::{Display, Result};
 use std::cmp::PartialEq;
 use std::convert::From;
 use std::path::Path;
 use std::fs;
 use std::io;
-use super::{Artist, Album, add_vec, remove_vec};
+use super::Album;
 
 /// .metdata.json
 /// 
@@ -23,23 +25,29 @@ pub struct Metadata {
     /// The asset key representing the album cover art.
     pub cover: String,
 
-    /// Artists
+    /// Default Artist
     /// 
-    /// List of [Artist]s in this album.
-    pub artists: Vec<Artist>
+    /// Represents the UUIDv4 of the main [Artist] of this album
+    pub default: Option<Uuid>,
+
+    /// Additional Artists
+    /// 
+    /// Map of which additional artists are associated with what music track
+    pub artists: HashMap<String, Vec<Uuid>>
 }
 
 impl Metadata {
     /// New Metadata
     /// 
     /// Creates new [Metadata]. Authors can be appended later on.
-    pub fn new(name: String, cover: String, artists: Option<Vec<Artist>>) -> Metadata {
+    pub fn new(name: String, cover: String, default_artist: Option<Uuid>, artists: Option<HashMap<String, Vec<Uuid>>>) -> Metadata {
         Metadata {
             name,
             cover,
+            default: default_artist,
             artists: match artists {
                 Some(x) => x,
-                None => Vec::new()
+                None => HashMap::new()
             }
         }
     }
@@ -51,22 +59,6 @@ impl Metadata {
         let data = fs::read_to_string(path)?;
         Ok(from_str(data.as_str())?)
     }
-
-    /// Add Artist
-    /// 
-    /// Adds an [Artist], if they don't exist yet.
-    pub fn add_artist(&mut self, art: Artist) -> &mut Metadata {
-        add_vec(&mut self.artists, art);
-        self
-    }
-
-    /// Remove Artist
-    /// 
-    /// Removes an [Artist], if they already exist.
-    pub fn remove_artist(&mut self, art: Artist) -> &mut Metadata {
-        remove_vec(&mut self.artists, art);
-        self
-    }
 }
 
 impl From<Album> for Metadata {
@@ -74,7 +66,8 @@ impl From<Album> for Metadata {
         Metadata {
             name: x.name,
             cover: x.cover,
-            artists: x.artists
+            artists: x.files,
+            default: None
         }
     }
 }

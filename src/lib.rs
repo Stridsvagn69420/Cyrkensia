@@ -32,8 +32,6 @@
 //! hostinfo.set_origin("https://foo.bar/my-hostinfo.json".to_string());
 //! ```
 
-use std::cmp::PartialEq;
-
 /// Owner struct
 mod owner;
 pub use self::owner::Owner;
@@ -87,21 +85,3 @@ pub mod meta {
 /// 
 /// This submodule contains middlewares and other tools needed only for the Cyrkensia server.
 pub mod server;
-
-/// Remove from [Vec]
-/// 
-/// Removes an element from a [Vec], if it exists already, without returning a new [Vec].
-pub(crate) fn remove_vec<T: PartialEq>(arr: &mut Vec<T>, elm: T) {
-    if let Some(i) = arr.iter().position(|x| *x == elm) {
-        arr.remove(i);
-    }
-}
-
-/// Add to [Vec]
-/// 
-/// Adds an element to a [Vec], if the element doesn't exist yet, without returning a new [Vec].
-pub(crate) fn add_vec<T: PartialEq>(arr: &mut Vec<T>, elm: T) {
-    if !arr.contains(&elm) {
-        arr.push(elm);
-    }
-}

@@ -1,5 +1,5 @@
 use actix_web::http::Uri;
-use crate::{Hostinfo, Config};
+use crate::{Hostinfo, Config, Artist};
 use std::fmt::Write;
 use std::sync::Mutex;
 use std::time::Instant;
@@ -35,6 +35,11 @@ pub struct CyrkensiaState {
     /// The loaded Config (read-only)
     pub config: Config,
 
+    /// Artists
+    /// 
+    /// The loaded Artists (read-only)
+    pub artists: Vec<Artist>,
+
     /// Hostinfo
     /// 
     /// The latest generated [Hostinfo].
@@ -53,14 +58,18 @@ impl CyrkensiaState {
     /// Constructur
     /// 
     /// Creates a new [CyrkensiaState] with given [Config].
-    pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {
+    pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {       
+        // Read all artists
+        let arts = Artist::read_multiple(&cfg.root)?;
+
         // State with caching
         if cfg.max_age.is_some() {
-            let hostinfo = Hostinfo::generate(&cfg)?;
+            let hostinfo = Hostinfo::generate(&cfg, &arts)?;
             return Ok(CyrkensiaState {
                 last_updated: Mutex::new(Instant::now()),
                 hostinfo: Mutex::new(hostinfo),
-                config: cfg
+                config: cfg,
+                artists: arts
             });
         }
 
@@ -69,6 +78,7 @@ impl CyrkensiaState {
             hostinfo: Mutex::new(Hostinfo::empty()),
             last_updated: Mutex::new(Instant::now()),
             config: cfg,
+            artists: arts
         })
     }
 }

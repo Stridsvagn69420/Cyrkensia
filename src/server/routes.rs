@@ -10,7 +10,7 @@ pub async fn hostinfo(req: HttpRequest, data: web::Data<CyrkensiaState>) -> impl
     // Get config
     let Some(delay) = data.config.max_age else {
         // Ad hoch Hostinfo
-        let Ok(resp) = responses::hostinfo_json(&data.config) else {
+        let Ok(resp) = responses::hostinfo_json(&data.config, &data.artists) else {
             return responses::server_500(Some("Failed to generate hostinfo"));
         };
         return resp;
@@ -26,7 +26,7 @@ pub async fn hostinfo(req: HttpRequest, data: web::Data<CyrkensiaState>) -> impl
 
     if last_updated.elapsed().as_secs() >= delay {
         // Generate new Hostinfo if expired
-        let Ok(new_hostinfo) = Hostinfo::generate(&data.config) else {
+        let Ok(new_hostinfo) = Hostinfo::generate(&data.config, &data.artists) else {
             return responses::server_500(Some("Failed to update hostinfo"));
         };
 

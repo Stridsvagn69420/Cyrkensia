@@ -1,14 +1,14 @@
 use std::io;
 use actix_web::{HttpResponse, body::MessageBody};
 use actix_web::http::header::{ContentType, CONTENT_LENGTH};
-use crate::{Config, Hostinfo};
+use crate::{Config, Hostinfo, Artist};
 
 /// Hostinfo from Config
 /// 
 /// Attempts to create a [HttpResponse] from a generated [Hostinfo] by a [Config].
-pub fn hostinfo_json(cfg: &Config) -> io::Result<HttpResponse> {
+pub fn hostinfo_json(cfg: &Config, arts: &Vec<Artist>) -> io::Result<HttpResponse> {
     // Generate Hostinfo
-    let hostinfo = Hostinfo::generate(cfg)?;
+    let hostinfo = Hostinfo::generate(cfg, arts)?;
     hostinfo_data(&hostinfo)
 }
 
