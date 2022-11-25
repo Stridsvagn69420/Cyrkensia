@@ -33,9 +33,10 @@ pub struct Config {
 	/// The Rich Presence asset key used for displaying the server.
 	pub icon: String,
 
-	/// Htpasswd file
+	/// Account file
 	/// 
-	/// The path to the .htpasswd file for HTTP-Basic Authentication. If none is present, HTTP Basic Auth will be disabled.
+	/// The path to the Account file for HTTP-Basic Authentication. If none is present, HTTP Basic Auth will be disabled.
+	/// Note that the file must be a JSON of [Vec]<[Account](super::account::Account)>.
 	pub htpasswd: Option<String>,
 
 	/// Bind address

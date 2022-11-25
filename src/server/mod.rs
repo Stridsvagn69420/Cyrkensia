@@ -1,4 +1,5 @@
 use actix_web::http::Uri;
+use crate::account::Account;
 use crate::{Hostinfo, Config, Artist};
 use std::fmt::Write;
 use std::sync::Mutex;
@@ -35,9 +36,14 @@ pub struct CyrkensiaState {
 	/// The loaded Config (read-only)
 	pub config: Config,
 
+	/// Accounts
+	/// 
+	/// The optionally loaded Account database (read-only)
+	pub accounts: Option<Vec<Account>>,
+
 	/// Artists
 	/// 
-	/// The loaded Artists (read-only)
+	/// The lateast loaded Artists
 	pub artists: Mutex<Vec<Artist>>,
 
 	/// Hostinfo
@@ -78,18 +84,22 @@ impl CyrkensiaState {
 	/// Constructur
 	/// 
 	/// Creates a new [CyrkensiaState] with given [Config].
-	pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {       
-		// Read all artists
-		let arts = Artist::read_multiple(&cfg.root)?;
+	pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {
+		let accounts = match &cfg.htpasswd {
+			Some(path) => Some(Account::load(path)?),
+			None => None
+		};
 
 		// State with caching
 		if cfg.max_age.is_some() {
+			let arts = Artist::read_multiple(&cfg.root)?;
 			let hostinfo = Hostinfo::generate(&cfg, &arts)?;
 			return Ok(CyrkensiaState {
 				last_updated: Mutex::new(Instant::now()),
 				hostinfo: Mutex::new(hostinfo),
+				artists: Mutex::new(arts),
 				config: cfg,
-				artists: Mutex::new(arts)
+				accounts
 			});
 		}
 
@@ -97,8 +107,9 @@ impl CyrkensiaState {
 		Ok(CyrkensiaState {
 			hostinfo: Mutex::new(Hostinfo::empty()),
 			last_updated: Mutex::new(Instant::now()),
+			artists: Mutex::new(Vec::new()),
 			config: cfg,
-			artists: Mutex::new(arts)
+			accounts
 		})
 	}
 }

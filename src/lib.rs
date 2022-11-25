@@ -92,4 +92,4 @@ pub mod server;
 /// Account database
 /// 
 /// Submodule containing the [Account](accounts::Account) struct and related cryptographic and wrapper functions.
-pub mod accounts;
+pub mod account;

@@ -1,8 +1,11 @@
 use serde::{Deserialize, Serialize};
+use serde_json::from_str;
 use rand::distributions::Alphanumeric;
 use rand::{Rng, thread_rng};
 use blake3::{Hasher, OUT_LEN};
 use std::fmt::Display;
+use std::path::Path;
+use std::{io, fs};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Account {
@@ -41,6 +44,14 @@ impl Account {
 	pub fn verify(&self, passwd: String) -> bool {
 		let passhash = hash_passwd_salt(passwd, &self.salt);
 		passhash == self.password
+	}
+
+	/// Load Account file
+	/// 
+	/// Loads an Account file
+	pub fn load(file: impl AsRef<Path>) -> io::Result<Vec<Account>> {
+		let data = fs::read_to_string(file)?;
+		Ok(from_str(data.as_str())?)
 	}
 }
 
