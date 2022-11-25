@@ -22,12 +22,14 @@
 //! 
 //! Reading a Config and generating its Hostinfo
 //! ```no_run
-//! use cyrkensia::{Hostinfo, Config};
+//! use cyrkensia::{Hostinfo, Config, Artist};
 //! 
 //! // Load the config file
 //! let config = Config::load_file("config.json").unwrap();
+//! // Load the artists
+//! let artists = Artist::read_multiple(&config.root).unwrap();
 //! // Generate the corresponding Hostinfo
-//! let mut hostinfo = Hostinfo::generate(&config).unwrap();
+//! let mut hostinfo = Hostinfo::generate(&config, &artists).unwrap();
 //! // Optionally set the origin
 //! hostinfo.set_origin("https://foo.bar/my-hostinfo.json".to_string());
 //! ```
