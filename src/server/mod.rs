@@ -38,7 +38,7 @@ pub struct CyrkensiaState {
     /// Artists
     /// 
     /// The loaded Artists (read-only)
-    pub artists: Vec<Artist>,
+    pub artists: Mutex<Vec<Artist>>,
 
     /// Hostinfo
     /// 
@@ -69,7 +69,7 @@ impl CyrkensiaState {
                 last_updated: Mutex::new(Instant::now()),
                 hostinfo: Mutex::new(hostinfo),
                 config: cfg,
-                artists: arts
+                artists: Mutex::new(arts)
             });
         }
 
@@ -78,7 +78,7 @@ impl CyrkensiaState {
             hostinfo: Mutex::new(Hostinfo::empty()),
             last_updated: Mutex::new(Instant::now()),
             config: cfg,
-            artists: arts
+            artists: Mutex::new(arts)
         })
     }
 }
