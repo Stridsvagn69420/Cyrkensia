@@ -1,11 +1,11 @@
-use serde::{Deserialize, Serialize};
-use serde_json::from_str;
-use rand::distributions::Alphanumeric;
-use rand::{Rng, thread_rng};
-use blake3::{Hasher, OUT_LEN};
 use std::fmt::Display;
 use std::path::Path;
 use std::{io, fs};
+use serde::{Deserialize, Serialize};
+use serde_json::from_str;
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::{SaltString, Result};
+use argon2::{Argon2, PasswordHasher, PasswordVerifier, PasswordHash};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Account {
@@ -29,21 +29,23 @@ impl Account {
 	/// New Account
 	/// 
 	/// Creates a new account with a random salt and given password.
-	pub fn new(name: String, passwd: String) -> Account {
+	pub fn new(name: String, passwd: String) -> Result<Account> {
 		let salt = random_salt();
-		Account {
+		let hash = hash_passwd_salt(passwd, &salt)?.to_string();
+		Ok(Account {
 			username: name,
-			password: hash_passwd_salt(passwd, &salt),
+			password: hash,
 			salt
-		}
+		})
 	}
 
 	/// Verify Password
 	/// 
 	/// Verifies the Account against a given plaintext password.
-	pub fn verify(&self, passwd: String) -> bool {
-		let passhash = hash_passwd_salt(passwd, &self.salt);
-		passhash == self.password
+	pub fn verify(&self, passwd: String) -> Result<()> {
+		let passhash = hash_passwd_salt(passwd, &self.salt)?;
+		get_argon2()
+		.verify_password(self.password.as_bytes(), &passhash)
 	}
 
 	/// Load Account file
@@ -61,35 +63,26 @@ impl Display for Account {
     }
 }
 
-/// Hash input
-/// 
-/// Hashes an input. The input has to append the salt itself.
-/// Returns a formatted String representing the hash value.
-pub fn hash(input: &[u8]) -> String {
-	let mut hasher = Hasher::new();
-	hasher.update(input);
-	hasher.finalize().to_string()
-}
-
 /// Hash Password with Salt
 /// 
-/// Hashes the given password with given salt.
-/// Wrapper for [hash].
-pub fn hash_passwd_salt(passwd: String, salt: &String) -> String {
-	// Get input and salt as bytes
-	let mut userpass: Vec<u8> = passwd.into();
-	userpass.extend(salt.as_bytes());
-	hash(&userpass)
+/// Hashes the password with given salt to a [String].
+/// Wrapper for [Argon2]'s `hash_password()`.
+pub fn hash_passwd_salt(passwd: String, salt: &String) -> Result<PasswordHash> {
+	get_argon2()
+	.hash_password(passwd.as_bytes(), salt)
 }
 
 /// Random Salt
 /// 
-/// Generates a random salt for the given bit length.
-/// Note that `bits` should be a multiple of 8.
+/// Generates a random salt for Argon2 with the [OsRng].
 pub fn random_salt() -> String {
-	thread_rng()
-	.sample_iter(&Alphanumeric)
-	.take(OUT_LEN)
-	.map(char::from)
-	.collect()
+	SaltString::generate(&mut OsRng)
+	.to_string()
+}
+
+/// Get Argon2 context
+/// 
+/// Creates an Argon2 context that is used for every function here.
+pub fn get_argon2() -> Argon2<'static> {
+	Argon2::default()
 }
