@@ -30,75 +30,75 @@ pub mod responses;
 /// 
 /// State for the Actix-Web server. Used in [routes].
 pub struct CyrkensiaState {
-    /// Config
-    /// 
-    /// The loaded Config (read-only)
-    pub config: Config,
+	/// Config
+	/// 
+	/// The loaded Config (read-only)
+	pub config: Config,
 
-    /// Artists
-    /// 
-    /// The loaded Artists (read-only)
-    pub artists: Mutex<Vec<Artist>>,
+	/// Artists
+	/// 
+	/// The loaded Artists (read-only)
+	pub artists: Mutex<Vec<Artist>>,
 
-    /// Hostinfo
-    /// 
-    /// The latest generated [Hostinfo].
-    /// Only used if caching is activated.
-    pub hostinfo: Mutex<Hostinfo>,
+	/// Hostinfo
+	/// 
+	/// The latest generated [Hostinfo].
+	/// Only used if caching is activated.
+	pub hostinfo: Mutex<Hostinfo>,
 
-    /// Last Hostinfo Update
-    /// 
-    /// The [timestamp](Instant) when the [Hostinfo] was last updated.
-    /// `.elapsed().as_secs()` will be used to compare it with the `max_age` in the [Config].
-    /// Only used if caching is activated.
-    pub last_updated: Mutex<Instant>
-}
-
-impl CyrkensiaState {
-    /// Constructur
-    /// 
-    /// Creates a new [CyrkensiaState] with given [Config].
-    pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {       
-        // Read all artists
-        let arts = Artist::read_multiple(&cfg.root)?;
-
-        // State with caching
-        if cfg.max_age.is_some() {
-            let hostinfo = Hostinfo::generate(&cfg, &arts)?;
-            return Ok(CyrkensiaState {
-                last_updated: Mutex::new(Instant::now()),
-                hostinfo: Mutex::new(hostinfo),
-                config: cfg,
-                artists: Mutex::new(arts)
-            });
-        }
-
-        // State without caching
-        Ok(CyrkensiaState {
-            hostinfo: Mutex::new(Hostinfo::empty()),
-            last_updated: Mutex::new(Instant::now()),
-            config: cfg,
-            artists: Mutex::new(arts)
-        })
-    }
+	/// Last Hostinfo Update
+	/// 
+	/// The [timestamp](Instant) when the [Hostinfo] was last updated.
+	/// `.elapsed().as_secs()` will be used to compare it with the `max_age` in the [Config].
+	/// Only used if caching is activated.
+	pub last_updated: Mutex<Instant>
 }
 
 /// Uri Display without Query
 /// 
 /// Displays a Uri without the query parameters
 pub fn uri_noquery(uri: &Uri) -> String {
-    let mut f = String::new();
+	let mut f = String::new();
 
-    // Protocol
-    if let Some(scheme) = uri.scheme() {
-        let _ = write!(&mut f, "{}://", scheme);
-    }
-    // Server
-    if let Some(authority) = uri.authority() {
-        let _ = write!(&mut f, "{}", authority);
-    }
-    // Path
-    let _ = write!(&mut f, "{}", uri.path());
+	// Protocol
+	if let Some(scheme) = uri.scheme() {
+		let _ = write!(&mut f, "{}://", scheme);
+	}
+	// Server
+	if let Some(authority) = uri.authority() {
+		let _ = write!(&mut f, "{}", authority);
+	}
+	// Path
+	let _ = write!(&mut f, "{}", uri.path());
 
-    f
+	f
+}
+
+impl CyrkensiaState {
+	/// Constructur
+	/// 
+	/// Creates a new [CyrkensiaState] with given [Config].
+	pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {       
+		// Read all artists
+		let arts = Artist::read_multiple(&cfg.root)?;
+
+		// State with caching
+		if cfg.max_age.is_some() {
+			let hostinfo = Hostinfo::generate(&cfg, &arts)?;
+			return Ok(CyrkensiaState {
+				last_updated: Mutex::new(Instant::now()),
+				hostinfo: Mutex::new(hostinfo),
+				config: cfg,
+				artists: Mutex::new(arts)
+			});
+		}
+
+		// State without caching
+		Ok(CyrkensiaState {
+			hostinfo: Mutex::new(Hostinfo::empty()),
+			last_updated: Mutex::new(Instant::now()),
+			config: cfg,
+			artists: Mutex::new(arts)
+		})
+	}
 }
