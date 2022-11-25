@@ -16,7 +16,6 @@ pub mod middleware;
 /// Submodule containing Cyrkensia redirects.
 pub mod redirect;
 
-
 /// Routes
 /// 
 /// Submodule containing Cyrkensia routes.
