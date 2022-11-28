@@ -13,13 +13,13 @@ pub fn redirect(url: &str) -> impl Responder {
 /// Repository redirect
 /// 
 /// Redirects to the source code repository.
-pub async fn repository() -> impl Responder {
+pub fn repository() -> impl Responder {
 	redirect(meta::REPOSITORY)
 }
 
 /// License redirect
 /// 
 /// Redirects to the license text.
-pub async fn license() -> impl Responder {
+pub fn license() -> impl Responder {
 	redirect(meta::LICENSE_URL)
 }

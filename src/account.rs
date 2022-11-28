@@ -44,7 +44,7 @@ impl Account {
 	/// Verifies the Account against a given plaintext password.
 	pub fn verify(&self, passwd: String) -> Result<()> {
 		let passhash = hash_passwd_salt(passwd, &self.salt)?;
-		get_argon2()
+		get_argon2!()
 		.verify_password(self.password.as_bytes(), &passhash)
 	}
 
@@ -68,7 +68,7 @@ impl Display for Account {
 /// Hashes the password with given salt to a [String].
 /// Wrapper for [Argon2]'s `hash_password()`.
 pub fn hash_passwd_salt(passwd: String, salt: &String) -> Result<PasswordHash> {
-	get_argon2()
+	get_argon2!()
 	.hash_password(passwd.as_bytes(), salt)
 }
 
@@ -83,6 +83,10 @@ pub fn random_salt() -> String {
 /// Get Argon2 context
 /// 
 /// Creates an Argon2 context that is used for every function here.
-pub fn get_argon2() -> Argon2<'static> {
-	Argon2::default()
+#[macro_export]
+macro_rules! get_argon2 {
+	() => {
+		Argon2::default()
+	};
 }
+pub use get_argon2;
