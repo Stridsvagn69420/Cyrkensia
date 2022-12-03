@@ -38,7 +38,7 @@ pub struct CyrkensiaState {
 	/// Accounts
 	/// 
 	/// The optionally loaded Account database (read-only)
-	pub accounts: Option<Vec<Account>>,
+	pub accounts: Vec<Account>,
 
 	/// Artists
 	/// 
@@ -85,8 +85,8 @@ impl CyrkensiaState {
 	/// Creates a new [CyrkensiaState] with given [Config].
 	pub fn new(cfg: Config) -> io::Result<CyrkensiaState> {
 		let accounts = match &cfg.htpasswd {
-			Some(path) => Some(Account::load(path)?),
-			None => None
+			Some(path) => Account::load(path)?,
+			None => Vec::new()
 		};
 
 		// State with caching

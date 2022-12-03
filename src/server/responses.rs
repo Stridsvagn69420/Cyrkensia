@@ -1,6 +1,7 @@
 use std::io;
-use actix_web::{HttpResponse, body::MessageBody};
-use actix_web::http::header::{ContentType, CONTENT_LENGTH};
+use actix_web::body::MessageBody;
+use actix_web::{HttpResponse, HttpResponseBuilder};
+use actix_web::http::header::{ContentType, CONTENT_LENGTH, WWW_AUTHENTICATE};
 use crate::{Config, Hostinfo, Artist};
 
 /// Hostinfo from Config
@@ -32,10 +33,31 @@ pub fn hostinfo_data(hstinfo: &Hostinfo) -> io::Result<HttpResponse> {
 /// 
 /// Returns a 500 Error with an optional body message
 pub fn server_500(msg: Option<impl MessageBody + 'static>) -> HttpResponse {
+	error(HttpResponse::InternalServerError(), msg)
+}
+
+/// HTTP Status 404
+/// 
+/// Returns a 404 Error with an optional body message
+pub fn client_404(msg: Option<impl MessageBody + 'static>) -> HttpResponse {
+	error(HttpResponse::NotFound(), msg)
+}
+
+/// HTTP Status 401
+/// 
+/// Returns a 401 Error with an optional body message
+pub fn client_401(msg: Option<impl MessageBody + 'static>) -> HttpResponse {
+	let mut resp = HttpResponse::Unauthorized();
+	resp.insert_header((WWW_AUTHENTICATE, "Basic realm=\"Cyrkensia\""));
+	error(resp, msg)
+}
+
+/// General Purpose Status Reponse Builder
+/// 
+/// Just makes the [HttpResponseBuilder] as a finished [HttpResponse], optionally being able to pass a body.
+pub fn error(mut resp: HttpResponseBuilder, msg: Option<impl MessageBody + 'static>) -> HttpResponse {
 	if let Some(message) = msg {
-		return HttpResponse::InternalServerError()
-		.body(message)
+		return resp.body(message)
 	}
-	HttpResponse::InternalServerError()
-	.finish()
+	resp.finish()
 }
