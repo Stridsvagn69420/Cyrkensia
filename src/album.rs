@@ -1,8 +1,11 @@
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
+use std::fs;
+use std::io;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 use std::convert::From;
+use std::path::PathBuf;
 use super::Metadata;
 
 /// Album
@@ -51,6 +54,34 @@ impl Album {
 			},
 			size
 		}
+	}
+
+	/// Find Album in filesystem
+	/// 
+	/// Attempts to find an album in given roots by set folder name
+	pub fn find(roots: &[String], name: &String) -> io::Result<PathBuf> {
+		for root in roots {
+			let item = fs::read_dir(root)?.into_iter()
+			// Filter out invalid entries
+			.filter_map(|x| x.ok())
+			// Get dirname as String
+			.filter_map(|x| {
+				let path = x.path();
+				if let Some(filename) = path.file_name()
+				.and_then(|y| y.to_str()).map(|z| z.to_string()) {
+        			return Some((filename, path));
+    			}
+				None
+			})
+			// Find album
+			.find(|item| &item.0 == name);
+
+			// Return first match
+			if let Some(path) = item {
+				return Ok(path.1);
+			}
+		}
+		Err(io::Error::new(io::ErrorKind::NotFound, "Could not find album"))
 	}
 }
 

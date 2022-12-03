@@ -1,9 +1,8 @@
 use std::time::Instant;
-use std::path::Path;
 use actix_web::{web, Responder, HttpRequest, HttpResponse};
 use actix_web::http::header::ContentType;
 use super::{CyrkensiaState, responses, uri_noquery};
-use crate::{Hostinfo, Artist, Metadata};
+use crate::{Hostinfo, Artist, Metadata, Album};
 
 /// Hostinfo Route
 /// 
@@ -72,6 +71,8 @@ pub struct IndexParams {
 /// 
 /// Route for listing all files of a specific. Redundant, can be ignored.
 pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
+	// Extract album name
+	let path = p.into_inner();
 	// Read files and album name depending on if cache is enabled or not
 	let meta: (String, usize, Vec<String>) = match data.config.max_age {
 		Some(_) => {
@@ -79,7 +80,7 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 			let Ok(hostinfo) = data.hostinfo.lock() else {
 				return responses::server_500(None::<String>);
 			};
-			let Some(album) = hostinfo.albums.clone().into_iter().find(|x| x.path == p.album) else {
+			let Some(album) = hostinfo.albums.clone().into_iter().find(|x| x.path == path.album) else {
 				return responses::client_404(Some("Album not found"));
 			};
 
@@ -89,12 +90,17 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 
 		},
 		None => {
-			// Ad-hoc files and metadata
-			let Ok(files) = Hostinfo::list_files(&p.album) else {
-				return responses::client_404(Some("Album not found or accessable"));
-			};
-			let Ok(album) = Metadata::load(Path::new(p.album.as_str()).join(".metadata.json")) else {
+			// Attempt to find album in filesystem
+			let Ok(path) = Album::find(&data.config.root, &path.album) else {
 				return responses::client_404(Some("Album not found"));
+			};
+
+			// Ad-hoc metadata and files
+			let Ok(album) = Metadata::load(path.join(".metadata.json")) else {
+				return responses::client_404(Some("Album not found"));
+			};
+			let Ok(files) = Hostinfo::list_files(path) else {
+				return responses::client_404(Some("Album not accessable"));
 			};
 
 			// Return tri-tuple
@@ -103,8 +109,8 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 	};
 
 	// Codegen
-	let headstr = format!("<h3>{} ({})</h3>", meta.0, meta.1);
-	let bodystr: String = meta.2.into_iter().fold(String::new(), |total, item| total + &format!("<a href=\"{}\">{}</a><br>\n", item, item));
+	let headstr = format!("<h3>{} ({})</h3>\n", meta.0, meta.1);
+	let bodystr = meta.2.into_iter().fold(String::new(), |total, item| total + &format!("<a href=\"{}\">{}</a><br>\n", item, item));
 
 	// Send response
 	HttpResponse::Ok()
