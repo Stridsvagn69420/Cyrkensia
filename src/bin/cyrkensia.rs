@@ -38,7 +38,9 @@ async fn server(cfg: Config) -> io::Result<()> {
 	let unbound_server = HttpServer::new(move || {
 		// Initialize state
 		let Ok(state) = CyrkensiaState::new(cfg.clone()) else {
-			eprintln!("Cyrkensia failed trying to initialize!");
+			let red: &str = Colors::RedBright.as_ref();
+			eprintln!("{red}{}\x1b[0m", timelog!("Cyrkensia failed trying to initialize!"));
+			eprintln!("See {WIKI_HELP_URL} for more.");
 			exit(1);
 		};
 
