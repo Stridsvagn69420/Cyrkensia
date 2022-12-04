@@ -12,7 +12,7 @@ pub async fn hostinfo(data: web::Data<CyrkensiaState>) -> impl Responder {
 	// Get config
 	let Some(delay) = data.config.max_age else {
 		// Ad hoch Hostinfo
-		let Ok(artists) = Artist::read_multiple(&data.config.root) else {
+		let Ok(artists) = Artist::load_cascade(&data.config.artists) else {
 			return responses::server_500(Some("Failed to generate hostinfo"));
 		};
 		let Ok(resp) = responses::hostinfo_json(&data.config, &artists) else {
@@ -35,7 +35,7 @@ pub async fn hostinfo(data: web::Data<CyrkensiaState>) -> impl Responder {
 	// Update Cache if expired
 	if last_updated.elapsed().as_secs() >= delay {
 		// Read updated artists
-		let Ok(new_artists) = Artist::read_multiple(&data.config.root) else {
+		let Ok(new_artists) = Artist::load_cascade(&data.config.artists) else {
 			return responses::server_500(Some("Failed to update hostinfo"));
 		};
 
@@ -105,11 +105,13 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 	};
 
 	// Codegen
-	let headmeta = r"<style>
+	let headmeta = r###"<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
 	h2 { color: white; text-decoration: underline; }
 	a { color: cyan; margin: 8px; }
 	body { font-family: sans-serif, system-ui; background-color: #252545; }
-	</style>";
+	</style>
+	"###;
 	let headstr = format!("<h2>{} ({})</h2>", meta.0, meta.1);
 	let bodystr = meta.2.into_iter().fold(String::new(), |total, item| total + &format!("<a href=\"{}\">{}</a><br>\n", item, item));
 

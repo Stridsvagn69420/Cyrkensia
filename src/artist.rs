@@ -1,12 +1,12 @@
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
+use dirs::home_dir;
 use std::fmt::{Display, Result};
 use std::cmp::PartialEq;
 use std::convert::From;
-use std::path::{Path, PathBuf};
-use std::fs;
-use std::io;
-use super::Owner;
+use std::path::Path;
+use std::{fs, io, env};
+use super::{Owner, meta};
 
 /// Artist
 /// 
@@ -39,35 +39,32 @@ impl Artist {
 		}
 	}
 
-	/// Load single .artists.json
+	/// Load artists.json
 	/// 
-	/// Loads a single `.artists.json` as a [Vec] of [Artist]s
-	pub fn load_artists(path: impl AsRef<Path>) -> io::Result<Vec<Artist>> {
+	/// Loads a `artists.json` as a [Vec] of [Artist]s
+	pub fn load(path: impl AsRef<Path>) -> io::Result<Vec<Artist>> {
 		let rawdata = fs::read_to_string(path)?;
 		Ok(serde_json::from_str(rawdata.as_str())?)
 	}
 
-	/// Load multiple .artists.json
+	/// Cascade Loading
 	/// 
-	/// Loads multiple `.artists.json` as a combined [Vec] of [Artist]s
-	pub fn load_multiple_artists(paths: Vec<impl AsRef<Path>>) -> io::Result<Vec<Artist>> {
-		let mut res: Vec<Artist> = Vec::new();
-		for pth in paths {
-			let artst = Artist::load_artists(pth)?;
-			res.extend(artst);
-		}
-		Ok(res)
-	}
+	/// Attempts to load a config file by:
+	/// 1. Provided [String]
+	/// 2. `CYRKENSIA_ARTISTS` environment variable
+	/// 3. `~/.config/cyrkensia/artists.json` file
+	pub fn load_cascade(cmdarg: &Option<String>) -> io::Result<Vec<Artist>> {
+		// Select extra path
+		let envvar = env::var(meta::ARTISTS_ENVVAR);
 
-	/// Read multiple folders' .artists.json
-	/// 
-	/// Reads the .artists.json of multiple folders. Essentially like `load_multiple_artists`, but with `.artists.json` appended.
-	pub fn read_multiple(paths: &[String]) -> io::Result<Vec<Artist>> {
-		let conv_paths: Vec<PathBuf> = paths.iter()
-		.map(|x| Path::new(x).join(".artists.json")).collect();
-		
-		// Read all artists
-		Artist::load_multiple_artists(conv_paths)
+		// Read config from extra location
+		if let Some(path) = cmdarg.as_ref().or_else(|| envvar.as_ref().ok()) {
+			return Artist::load(path);
+		}
+
+		// Read with default path
+		let localpath = home_dir().unwrap_or_default().join(meta::ARTISTS_PATH);
+		Artist::load(localpath)
 	}
 }
 

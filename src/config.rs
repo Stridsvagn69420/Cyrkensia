@@ -41,9 +41,15 @@ pub struct Config {
 	/// Note that the file must be a JSON of [Vec]<[Account](super::account::Account)>.
 	pub htpasswd: Option<String>,
 
+	/// Artists file
+	/// 
+	/// The path to the central artists file, used for displaying an album's artists.
+	/// It will cascade load the file as described in [Artist](crate::Artist)'s `load_cascade()` function.
+	pub artists: Option<String>,
+
 	/// Bind address
 	/// 
-	/// The IP address to bind to, e.g. `127.0.0.1`, `0.0.0.0:80` or a Unix socket (Unix only).
+	/// The IP address to bind to, e.g. `127.0.0.1`, `0.0.0.0:80` or a Unix Domain Socket (Unix only).
 	pub bindaddr: String,
 
 	/// Owners
@@ -104,6 +110,7 @@ impl From<Hostinfo> for Config {
 			icon: x.icon,
 			htpasswd: None,
 			bindaddr: "".to_string(),
+			artists: None,
 			owners: x.owners,
 			max_age: None
 		}

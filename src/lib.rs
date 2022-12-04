@@ -27,7 +27,7 @@
 //! // Load the config file
 //! let config = Config::load_file("config.json").unwrap();
 //! // Load the artists
-//! let artists = Artist::read_multiple(&config.root).unwrap();
+//! let artists = Artist::load_cascade(&None).unwrap();
 //! // Generate the corresponding Hostinfo
 //! let mut hostinfo = Hostinfo::generate(&config, &artists).unwrap();
 //! ```
@@ -79,6 +79,8 @@ pub mod meta {
 	pub const CONFIG_PATH: &str = concat!(".config/", env!("CARGO_PKG_NAME"), "/config.json");
 	pub const USERS_ENVVAR: &str = "CYRKENSIA_USERS";
 	pub const USERS_PATH: &str = concat!(".config/", env!("CARGO_PKG_NAME"), "/users.json");
+	pub const ARTISTS_ENVVAR: &str = "CYRKENSIA_ARTISTS";
+	pub const ARTISTS_PATH: &str = concat!(".config/", env!("CARGO_PKG_NAME"), "/artists.json");
 }
 
 #[cfg(feature = "server")]

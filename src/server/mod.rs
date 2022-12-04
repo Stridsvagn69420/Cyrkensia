@@ -91,7 +91,7 @@ impl CyrkensiaState {
 
 		// State with caching
 		if cfg.max_age.is_some() {
-			let arts = Artist::read_multiple(&cfg.root)?;
+			let arts = Artist::load_cascade(&cfg.artists)?;
 			let hostinfo = Hostinfo::generate(&cfg, &arts)?;
 			return Ok(CyrkensiaState {
 				last_updated: Mutex::new(Instant::now()),
