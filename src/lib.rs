@@ -12,10 +12,10 @@
 //! If you're searching for Cyrkensia as a binary, see the [crates.io](https://crates.io/crates/cyrkensia) or [GitHub](https://github.com/Stridsvagn69420/Cyrkensia) page for more.
 //! 
 //! ## Features
-//! By default, the `server` feature is enabled. The latter is only relevant for people who write a custom Cyrkensia server.
+//! By default, the `accounts` and `server` features are enabled. The latter is only relevant for people who write a custom Cyrkensia server.
 //! You can disable `server` with this:
 //! ```toml
-//! cyrkensia = { version = "1", default-features = false }
+//! cyrkensia = { version = "1", default-features = false, features = ["accounts"] }
 //! ```
 //! 
 //! ## Examples
@@ -30,8 +30,6 @@
 //! let artists = Artist::read_multiple(&config.root).unwrap();
 //! // Generate the corresponding Hostinfo
 //! let mut hostinfo = Hostinfo::generate(&config, &artists).unwrap();
-//! // Optionally set the origin
-//! hostinfo.set_origin("https://foo.bar/my-hostinfo.json".to_string());
 //! ```
 
 /// Owner struct
@@ -92,5 +90,5 @@ pub mod server;
 #[cfg(feature = "accounts")]
 /// Account database
 /// 
-/// Submodule containing the [Account](accounts::Account) struct and related cryptographic and wrapper functions.
+/// Submodule containing the [Account](account::Account) struct and related cryptographic and wrapper functions.
 pub mod account;

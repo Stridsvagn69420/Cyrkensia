@@ -112,3 +112,31 @@ impl CyrkensiaState {
 		})
 	}
 }
+
+/// Timestamp
+/// 
+/// Creates the current timestamp formatted as `[%Y-%m-%d %H:%M:%S]`.
+/// Requires [chrono::Local].
+/// Evaluates to `Local::now().format("[%Y-%m-%d %H:%M:%S]").to_string()`.
+#[macro_export]
+macro_rules! timestamp {
+	() => {
+		Local::now().format("[%Y-%m-%d %H:%M:%S]").to_string()
+	};
+}
+pub use timestamp;
+
+/// Timelog
+/// 
+/// Formats a given message with a timestamp.
+/// If no message is provided, it just return [timestamp!], but with a whitespace added.
+#[macro_export]
+macro_rules! timelog {
+	() => {
+		(timestamp!() + " ").as_str()
+	};
+	($msg:expr) => {
+		(timestamp!() + " " + $msg).as_str()
+	};
+}
+pub use timelog;

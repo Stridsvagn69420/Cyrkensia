@@ -1,6 +1,6 @@
 use std::{env, io};
 use std::process::exit;
-use cyrkensia::Config;
+use cyrkensia::{Config, timelog, timestamp};
 use cyrkensia::meta::WIKI_HELP_URL;
 use cyrkensia::server::CyrkensiaState;
 use cyrkensia::server::redirect::trail_slash;
@@ -8,6 +8,7 @@ use cyrkensia::server::routes::{index, hostinfo};
 use cyrkensia::server::middleware::{cors_everywhere, source_headers, license_headers};
 use actix_web::{web, App, HttpServer};
 use kagero::printer::{Printer, Colors};
+use chrono::Local;
 
 /// Init
 /// 
@@ -67,7 +68,8 @@ async fn server(cfg: Config) -> io::Result<()> {
 	let server = unbound_server.bind(bindaddr)?;
 
 	// ---- Ignite ----
-	printer.println("Cyrkensia server successfully started!", Colors::CyanBright);
+	printer.print(timelog!(), Colors::Cyan)
+	.println("Cyrkensia server successfully started!", Colors::CyanBright);
 	server.run().await
 }
 
@@ -77,17 +79,28 @@ async fn main() {
 	let mut console = Printer::default();
 	let Ok(config) = init() else {
 		console.errorln("Failed to read the config file for Cyrkensia!", Colors::RedBright);
-		console.errorln(&("See ".to_owned() + WIKI_HELP_URL + " for more."), Colors::YellowBright);
+		morehelp(&mut console);
 		exit(1);
 	};
 
 	// Start
-	if let Err(serv) = server(config).await {
-		console.errorln("An error occured while running the server:", Colors::RedBright);
-		eprintln!("{serv}");
+	if let Err(segv) = server(config).await {
+		console.error(timelog!(), Colors::Red)
+		.errorln("An error occured while running the server:", Colors::RedBright);
+		eprintln!("{segv}");
+		morehelp(&mut console);
+		exit(1);
 	}
 
 	// Exit
-	console.println("Cyrkensia server successfully stopped!", Colors::CyanBright);
+	console.print(timelog!(), Colors::Cyan)
+	.println("Cyrkensia server successfully stopped!", Colors::CyanBright);
 	exit(0)
+}
+
+/// More help
+/// 
+/// Tells you to google the error.
+fn morehelp(cmd: &mut Printer) {
+	cmd.errorln(&("See ".to_owned() + WIKI_HELP_URL + " for more."), Colors::YellowBright);
 }

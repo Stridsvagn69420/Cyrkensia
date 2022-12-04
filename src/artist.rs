@@ -61,7 +61,7 @@ impl Artist {
 
 	/// Read multiple folders' .artists.json
 	/// 
-	/// Reads the .artists.json of multiple folders. Essentially like [load_multiple_artists], but with `.artists.json` appended.
+	/// Reads the .artists.json of multiple folders. Essentially like `load_multiple_artists`, but with `.artists.json` appended.
 	pub fn read_multiple(paths: &[String]) -> io::Result<Vec<Artist>> {
 		let conv_paths: Vec<PathBuf> = paths.iter()
 		.map(|x| Path::new(x).join(".artists.json")).collect();

@@ -26,7 +26,7 @@ pub struct Metadata {
 
 	/// Artists
 	/// 
-	/// Represents the UUIDv4 of the [Artist] of this album
+	/// Represents the UUIDv4 of the [Artist](super::Artist) of this album
 	pub artists: Vec<Uuid>
 }
 

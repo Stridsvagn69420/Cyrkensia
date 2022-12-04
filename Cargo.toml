@@ -27,6 +27,7 @@ kagero = { version = "0.4", default-features = false, features = ["printer"] }
 actix-web = { version = "4", optional = true }
 actix-cors = { version = "0.6", optional = true }
 blake3 = { version = "1.3", optional = true }
+chrono = { version = "*", optional = true, features = ["std", "clock"] }
 
 # Accounts only
 argon2 = { version = "0.4", optional = true, features = ["std", "password-hash"] }
@@ -35,7 +36,7 @@ rand = { version = "0.8", optional = true, features = ["std"] }
 [features]
 default = ["server", "accounts"]
 accounts = ["argon2", "rand"]
-server = ["actix-web", "actix-cors", "blake3"]
+server = ["actix-web", "actix-cors", "blake3", "chrono"]
 
 [build-dependencies]
 chrono = "0.4"
@@ -53,7 +54,7 @@ required-features = []
 [profile.release]
 lto = true
 strip = true
-debug = true
+debug = false
 
 [package.metadata.docs.rs]
 targets = [
