@@ -1,14 +1,14 @@
 use std::time::Instant;
-use actix_web::{web, Responder, HttpRequest, HttpResponse};
+use actix_web::{web, Responder, HttpResponse};
 use actix_web::http::header::ContentType;
 use serde::Deserialize;
-use super::{CyrkensiaState, responses, uri_noquery};
+use super::{CyrkensiaState, responses};
 use crate::{Hostinfo, Artist, Metadata, Album};
 
 /// Hostinfo Route
 /// 
 /// Route for serving a [Hostinfo]. Server needs [CyrkensiaState] in `.app_data()` for this.
-pub async fn hostinfo(req: HttpRequest, data: web::Data<CyrkensiaState>) -> impl Responder {
+pub async fn hostinfo(data: web::Data<CyrkensiaState>) -> impl Responder {
 	// Get config
 	let Some(delay) = data.config.max_age else {
 		// Ad hoch Hostinfo
@@ -51,8 +51,7 @@ pub async fn hostinfo(req: HttpRequest, data: web::Data<CyrkensiaState>) -> impl
 	}
 
 	// Set Origin URL
-	let mut final_hostinfo = hostinfo.clone();
-	final_hostinfo.set_origin(uri_noquery(req.uri()));
+	let final_hostinfo = hostinfo.clone();
 
 	// Return final result
 	let Ok(finalres) = responses::hostinfo_data(&final_hostinfo) else {
@@ -66,7 +65,7 @@ pub async fn hostinfo(req: HttpRequest, data: web::Data<CyrkensiaState>) -> impl
 /// 
 /// Simple struct containing the param-name and param-type needed for the [index] route.
 pub struct IndexParams {
-	album: String
+	pub album: String
 }
 
 /// Album Index Route
@@ -106,11 +105,16 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 	};
 
 	// Codegen
-	let headstr = format!("<h3>{} ({})</h3>\n", meta.0, meta.1);
+	let headmeta = r"<style>
+	h2 { color: white; text-decoration: underline; }
+	a { color: cyan; margin: 8px; }
+	body { font-family: sans-serif, system-ui; background-color: #252545; }
+	</style>";
+	let headstr = format!("<h2>{} ({})</h2>", meta.0, meta.1);
 	let bodystr = meta.2.into_iter().fold(String::new(), |total, item| total + &format!("<a href=\"{}\">{}</a><br>\n", item, item));
 
 	// Send response
 	HttpResponse::Ok()
 	.content_type(ContentType::html())
-	.body(headstr + &bodystr)
+	.body(format!("<html><head>{}</head><body>{}{}</body></html>", headmeta, headstr, bodystr))
 }

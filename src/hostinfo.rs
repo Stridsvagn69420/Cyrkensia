@@ -38,11 +38,6 @@ pub struct Hostinfo {
 	/// The total size of the repository and its music files in bytes.
 	pub size: u128,
 
-	/// Origin URL
-	/// 
-	/// The URL to get an updated version of this Hostinfo
-	pub origin: String,
-
 	/// Albums
 	/// 
 	/// List of all albums that this Cyrkensia repository provides.
@@ -60,13 +55,6 @@ pub struct Hostinfo {
 }
 
 impl Hostinfo {
-	/// Set Origin
-	/// 
-	/// Sets the origin of the Hostinfo. This function solely exists to remind library users to swap out the empty default origin.
-	pub fn set_origin(&mut self, org: String) {
-		self.origin = org
-	}
-
 	/// Generate empty Hostinfo
 	/// 
 	/// Generates an empty Hostinfo.
@@ -77,7 +65,6 @@ impl Hostinfo {
 			uuid: Uuid::new_v4(),
 			secured: false,
 			size: 0,
-			origin: "".to_string(),
 			albums: Vec::new(),
 			owners: Vec::new(),
 			artists: Vec::new()
@@ -216,7 +203,6 @@ impl From<Config> for Hostinfo {
 			uuid: x.uuid,
 			secured: x.htpasswd.is_some(),
 			size: 0,
-			origin: "".to_string(),
 			albums: Vec::new(),
 			owners: x.owners,
 			artists: Vec::new()
@@ -231,7 +217,6 @@ impl PartialEq for Hostinfo {
 		self.uuid == other.uuid &&
 		self.secured == other.secured &&
 		self.size == other.size &&
-		self.origin == other.origin &&
 		self.albums == other.albums &&
 		self.owners == other.owners
 	}
