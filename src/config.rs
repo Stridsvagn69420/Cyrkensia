@@ -1,12 +1,14 @@
 use serde::{Serialize, Deserialize};
 use serde_json::from_str;
+use dirs::home_dir;
+use uuid::Uuid;
 use std::cmp::PartialEq;
 use std::convert::From;
+use std::path::Path;
 use std::io;
 use std::fs;
-use std::path::Path;
-use uuid::Uuid;
-use super::{Owner, Hostinfo};
+use std::env;
+use super::{Owner, Hostinfo, meta};
 
 /// Configuration
 /// 
@@ -44,16 +46,6 @@ pub struct Config {
 	/// The IP address to bind to, e.g. `127.0.0.1`, `0.0.0.0:80` or a Unix socket (Unix only).
 	pub bindaddr: String,
 
-	/// TLS Certificate (Optional)
-	/// 
-	/// The Path to the TLS certificate. TLS will only be activated if both certificate and key are provided.
-	pub tlscert: Option<String>,
-
-	/// TLS Key (Optional)
-	/// 
-	/// The path to the TLS key. TLS will only be activated if both certificate and key are provided.
-	pub tlskey: Option<String>,
-
 	/// Owners
 	/// 
 	/// List of repository [maintainers](Owner)
@@ -81,6 +73,26 @@ impl Config {
 	pub fn load_json(data: &str) -> io::Result<Config> {
 		Ok(from_str(data)?)
 	}
+
+	/// Cascade Loading
+	/// 
+	/// Attempts to load a config file by:
+	/// 1. First command-line argument
+	/// 2. `CYRKENSIA_CONFIG` environment variable
+	/// 3. `~/.config/cyrkensia/config.json` file
+	pub fn load_cascade(cmdarg: Option<&String>) -> io::Result<Config> {
+		// Select extra path
+		let envvar = env::var(meta::CONFIG_ENVVAR);
+
+		// Read config from extra location
+		if let Some(path) = cmdarg.or_else(|| envvar.as_ref().ok()) {
+			return Config::load_file(path);
+		}
+
+		// Read with default path
+		let localpath = home_dir().unwrap_or_default().join(meta::CONFIG_PATH);
+		Config::load_file(localpath)
+	}
 }
 
 impl From<Hostinfo> for Config {
@@ -92,8 +104,6 @@ impl From<Hostinfo> for Config {
 			icon: x.icon,
 			htpasswd: None,
 			bindaddr: "".to_string(),
-			tlscert: None,
-			tlskey: None,
 			owners: x.owners,
 			max_age: None
 		}
@@ -108,8 +118,6 @@ impl PartialEq for Config {
 		self.icon == other.icon &&
 		self.htpasswd == other.htpasswd &&
 		self.bindaddr == other.bindaddr &&
-		self.tlscert == other.tlscert &&
-		self.tlskey == other.tlskey &&
 		self.owners == other.owners
 	}
 }

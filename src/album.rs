@@ -3,7 +3,6 @@ use uuid::Uuid;
 use std::fs;
 use std::io;
 use std::cmp::PartialEq;
-use std::collections::HashMap;
 use std::convert::From;
 use std::path::PathBuf;
 use super::Metadata;
@@ -28,10 +27,15 @@ pub struct Album {
 	/// The relative path of the album.
 	pub path: String,
 
+	/// Artists
+	/// 
+	/// The UUID of the artists responsible for this album.
+	pub artists: Vec<Uuid>,
+
 	/// Files
 	/// 
 	/// All files present in the album as a relative path.
-	pub files: HashMap<String, Vec<Uuid>>,
+	pub files: Vec<String>,
 
 	/// Size
 	/// 
@@ -43,16 +47,14 @@ impl Album {
 	/// New Album
 	/// 
 	/// Creates a new album. If `artists` or `files` is [None], an empty array will be created for them.
-	pub fn new(name: String, cover: String, path: String, files: Option<HashMap<String, Vec<Uuid>>>, size: u128) -> Album {
+	pub fn new(name: String, cover: String, path: String, artists: Vec<Uuid>, files: Vec<String>, size: u128) -> Album {
 		Album {
 			name,
 			cover,
 			path,
-			files: match files {
-				Some(x) => x,
-				None => HashMap::new()
-			},
-			size
+			files,
+			size,
+    		artists
 		}
 	}
 
@@ -91,8 +93,9 @@ impl From<Metadata> for Album {
 			name: x.name,
 			cover: x.cover,
 			path: "".to_string(),
-			files: x.artists,
-			size: 0
+			files: Vec::new(),
+			size: 0,
+			artists: x.artists
 		}
 	}
 }

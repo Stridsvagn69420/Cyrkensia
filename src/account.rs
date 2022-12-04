@@ -1,11 +1,13 @@
 use std::fmt::Display;
 use std::path::Path;
-use std::{io, fs};
+use std::{io, fs, env};
+use dirs::home_dir;
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{SaltString, Result};
 use argon2::{Argon2, PasswordHasher, PasswordVerifier, PasswordHash};
+use super::meta;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Account {
@@ -54,6 +56,26 @@ impl Account {
 	pub fn load(file: impl AsRef<Path>) -> io::Result<Vec<Account>> {
 		let data = fs::read_to_string(file)?;
 		Ok(from_str(data.as_str())?)
+	}
+
+		/// Cascade Loading
+	/// 
+	/// Attempts to load a user file by:
+	/// 1. First command-line argument
+	/// 2. `CYRKENSIA_USERS` environment variable
+	/// 3. `~/.config/cyrkensia/users.json` file
+	pub fn load_cascade(cmdarg: Option<&String>, pathcfg: Option<&String>) -> io::Result<Vec<Account>> {
+		// Select extra path
+		let envvar = env::var(meta::USERS_ENVVAR);
+
+		// Read users from extra location
+		if let Some(path) = cmdarg.or_else(|| envvar.as_ref().ok()).or(pathcfg) {
+			return Account::load(path);
+		}
+
+		// Read with default path
+		let localpath = home_dir().unwrap_or_default().join(meta::USERS_PATH);
+		Account::load(localpath)
 	}
 }
 

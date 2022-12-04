@@ -1,6 +1,7 @@
 use std::time::Instant;
 use actix_web::{web, Responder, HttpRequest, HttpResponse};
 use actix_web::http::header::ContentType;
+use serde::Deserialize;
 use super::{CyrkensiaState, responses, uri_noquery};
 use crate::{Hostinfo, Artist, Metadata, Album};
 
@@ -60,6 +61,7 @@ pub async fn hostinfo(req: HttpRequest, data: web::Data<CyrkensiaState>) -> impl
 	finalres
 }
 
+#[derive(Deserialize)]
 /// Index Route Params
 /// 
 /// Simple struct containing the param-name and param-type needed for the [index] route.
@@ -74,38 +76,33 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 	// Extract album name
 	let path = p.into_inner();
 	// Read files and album name depending on if cache is enabled or not
-	let meta: (String, usize, Vec<String>) = match data.config.max_age {
-		Some(_) => {
-			// Cached files and metadata
-			let Ok(hostinfo) = data.hostinfo.lock() else {
-				return responses::server_500(None::<String>);
-			};
-			let Some(album) = hostinfo.albums.clone().into_iter().find(|x| x.path == path.album) else {
-				return responses::client_404(Some("Album not found"));
-			};
+	let meta: (String, usize, Vec<String>) = if data.config.max_age.is_some() {
+		// Cached files and metadata
+		let Ok(hostinfo) = data.hostinfo.lock() else {
+			return responses::server_500(None::<String>);
+		};
+		let Some(album) = hostinfo.albums.clone().into_iter().find(|x| x.path == path.album) else {
+			return responses::client_404(Some("Album not found"));
+		};
 
-			// Return tri-tuple
-			let files: Vec<String> = album.files.keys().cloned().collect();
-			(album.name, files.len(), files)
+		// Return tri-tuple
+		(album.name, album.files.len(), album.files)
+	} else {
+		// Attempt to find album in filesystem
+		let Ok(path) = Album::find(&data.config.root, &path.album) else {
+			return responses::client_404(Some("Album not found"));
+		};
 
-		},
-		None => {
-			// Attempt to find album in filesystem
-			let Ok(path) = Album::find(&data.config.root, &path.album) else {
-				return responses::client_404(Some("Album not found"));
-			};
+		// Ad-hoc metadata and files
+		let Ok(album) = Metadata::load(path.join(".metadata.json")) else {
+			return responses::client_404(Some("Album not found"));
+		};
+		let Ok(files) = Hostinfo::list_files(path) else {
+			return responses::client_404(Some("Album not accessable"));
+		};
 
-			// Ad-hoc metadata and files
-			let Ok(album) = Metadata::load(path.join(".metadata.json")) else {
-				return responses::client_404(Some("Album not found"));
-			};
-			let Ok(files) = Hostinfo::list_files(path) else {
-				return responses::client_404(Some("Album not accessable"));
-			};
-
-			// Return tri-tuple
-			(album.name, files.0.len(), files.0)
-		}
+		// Return tri-tuple
+		(album.name, files.0.len(), files.0)
 	};
 
 	// Codegen

@@ -142,31 +142,17 @@ impl Hostinfo {
 		};
 
 		// Read data
-		let mut m = Metadata::load(path.join(".metadata.json"))?;
+		let m = Metadata::load(path.join(".metadata.json"))?;
 		let c = Hostinfo::list_files(path)?;
-
-		// List files with default Artist
-		if let Some(defart) = m.default {
-			for file in c.0 {
-				if let Some(other_arts) = m.artists.get_mut(&file) {
-					// Add default Artist to listed file if it's not included yet
-					if other_arts.contains(&defart) {
-						other_arts.push(defart);
-					}
-				} else {
-					// Append all yet unlisted files
-					m.artists.insert(file, vec![defart]);
-				}
-			}
-		}
 
 		// Create Album
 		Ok(Album {
 			name: m.name,
 			cover: m.cover,
 			path: fname.to_string(),
-			files: m.artists,
+			files: c.0,
 			size: c.1,
+    		artists: m.artists,
 		})
 	}
 

@@ -67,6 +67,7 @@ pub mod meta {
 	pub const NAME_RICH: &str = "Cyrkensia";
 	pub const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 	pub const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
+	pub const WIKI_HELP_URL: &str = concat!(env!("CARGO_PKG_REPOSITORY"), "/wiki/Troubleshooting");
 	pub const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 	pub const LICENSE: &str = "EUPL-1.2";
 	pub const LICENSE_RICH: &str = "European Union Public License v1.2";
@@ -75,11 +76,11 @@ pub mod meta {
 	pub const RUSTC_VERSION: &str = env!("RUSTC_VERSION");
 	pub const COMPILE_DATE: &str = env!("COMPILE_DATE");
 	pub const TARGET: &str = env!("TARGET");
-	pub const USERAGENT: &str = concat!(
-		env!("CARGO_PKG_NAME"),
-		"/",
-		env!("CARGO_PKG_VERSION")
-	);
+	pub const USERAGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
+	pub const CONFIG_ENVVAR: &str = "CYRKENSIA_CONFIG";
+	pub const CONFIG_PATH: &str = concat!(".config/", env!("CARGO_PKG_NAME"), "/config.json");
+	pub const USERS_ENVVAR: &str = "CYRKENSIA_USERS";
+	pub const USERS_PATH: &str = concat!(".config/", env!("CARGO_PKG_NAME"), "/users.json");
 }
 
 #[cfg(feature = "server")]
