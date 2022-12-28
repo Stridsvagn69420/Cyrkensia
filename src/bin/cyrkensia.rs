@@ -75,6 +75,13 @@ async fn server(cfg: Config) -> io::Result<()> {
 	server.run().await
 }
 
+/// More help
+/// 
+/// Tells you to google the error.
+fn morehelp(cmd: &mut Printer) {
+	cmd.errorln(&("See ".to_owned() + WIKI_HELP_URL + " for more."), Colors::YellowBright);
+}
+
 #[actix_web::main]
 async fn main() {
 	// Init
@@ -84,6 +91,8 @@ async fn main() {
 		morehelp(&mut console);
 		exit(1);
 	};
+
+	// TODO: Add status message at start with information from the loaded config
 
 	// Start
 	if let Err(segv) = server(config).await {
@@ -98,11 +107,4 @@ async fn main() {
 	console.print(timelog!(), Colors::Cyan)
 	.println("Cyrkensia server successfully stopped!", Colors::CyanBright);
 	exit(0)
-}
-
-/// More help
-/// 
-/// Tells you to google the error.
-fn morehelp(cmd: &mut Printer) {
-	cmd.errorln(&("See ".to_owned() + WIKI_HELP_URL + " for more."), Colors::YellowBright);
 }

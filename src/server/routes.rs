@@ -1,4 +1,6 @@
+use std::path::PathBuf;
 use std::time::Instant;
+use std::{io, fs};
 use actix_web::{web, Responder, HttpResponse};
 use actix_web::http::header::ContentType;
 use serde::Deserialize;
@@ -60,10 +62,15 @@ pub async fn hostinfo(data: web::Data<CyrkensiaState>) -> impl Responder {
 	finalres
 }
 
-#[derive(Deserialize)]
+
+
+
+
+
 /// Index Route Params
 /// 
 /// Simple struct containing the param-name and param-type needed for the [index] route.
+#[derive(Deserialize)]
 pub struct IndexParams {
 	pub album: String
 }
@@ -74,18 +81,19 @@ pub struct IndexParams {
 pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
 	// Extract album name
 	let path = p.into_inner();
+
 	// Read files and album name depending on if cache is enabled or not
 	let meta: (String, usize, Vec<String>) = if data.config.max_age.is_some() {
 		// Cached files and metadata
 		let Ok(hostinfo) = data.hostinfo.lock() else {
 			return responses::server_500(None::<String>);
 		};
-		let Some(album) = hostinfo.albums.clone().into_iter().find(|x| x.path == path.album) else {
+		let Some(album) = hostinfo.albums.iter().find(|x| x.path == path.album) else {
 			return responses::client_404(Some("Album not found"));
 		};
 
 		// Return tri-tuple
-		(album.name, album.files.len(), album.files)
+		(album.name.clone(), album.files.len(), album.files.clone())
 	} else {
 		// Attempt to find album in filesystem
 		let Ok(path) = Album::find(&data.config.root, &path.album) else {
@@ -119,4 +127,80 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 	HttpResponse::Ok()
 	.content_type(ContentType::html())
 	.body(format!("<html><head>{}</head><body>{}{}</body></html>", headmeta, headstr, bodystr))
+}
+
+
+
+
+/// File Route Params
+/// 
+/// Simple struct for the path parameters used in [file_head] and [file_serving]
+#[derive(Deserialize)]
+pub struct FileParams {
+	pub albun: String,
+	pub file: String
+}
+
+impl FileParams {
+	/// Find file path
+	/// 
+	/// Attempts to find the file path in the filesystem.
+	pub fn find_file(roots: &[String], album: &String, file: String) -> io::Result<PathBuf> {
+		let album_path = Album::find(roots, album)?;
+		// Read found directory
+		let filepath = fs::read_dir(album_path)?.into_iter()
+		.filter_map(|x| {
+			let Ok(dentry) = x else {
+				return None;
+			};
+			Some(dentry)
+		})
+		// Convert filename
+		.filter_map(|y| {
+			if let Some(fname) = y.file_name().to_str() {
+				return Some((fname.to_string(), y.path()));
+			}
+			None
+			
+		})
+		// Find file
+		.find(|z| z.0 == file);
+
+		// Extract path
+		if let Some(stuff) = filepath {
+			return Ok(stuff.1);
+		}
+		Err(io::Error::new(io::ErrorKind::NotFound, "Could not find file"))
+	}
+}
+
+/// File Head Route
+/// 
+/// 
+pub async fn file_serving(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
+	let path = p.into_inner();
+
+	// Generate ETag with BLAKE3 hash as Hexadecimal
+	// Generate Digest header with BLAKE3, SHA-256, SHA-512 as Base64
+	// Generate Last-Modified header from fs::metadata
+	// Match HTTP Status Codes
+
+	HttpResponse::Ok()
+}
+
+/// File Serving Route
+/// 
+/// 
+pub async fn file_head(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
+	let pathdata = p.into_inner();
+	let Ok(path) = FileParams::find_file(&data.config.root, &pathdata.albun, pathdata.file) else {
+		return responses::client_404(Some("File not found"));
+	};
+
+	// Generate ETag with BLAKE3 hash as Hexadecimal
+	// Generate Digest header with BLAKE3, SHA-256, SHA-512 as Base64
+	// Generate Last-Modified header from fs::metadata
+	// Include If-Modified-Since behaviour and match HTTP Status Codes
+
+	HttpResponse::Ok().finish()
 }
