@@ -1,13 +1,14 @@
 use std::path::PathBuf;
 use std::time::Instant;
 use std::{io, fs};
+use blake3::hash;
 use base64::encode;
 use actix_web::{web, Responder, HttpResponse, HttpRequest};
 use actix_web::http::header::HeaderMap;
 use actix_web::http::header;
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
-use super::{CyrkensiaState, responses, hashgen, filetime, compare_time, get_mime};
+use super::{CyrkensiaState, responses, hashgen, filetime, compare_time, get_mime, slice_maker};
 use crate::{Hostinfo, Artist, Metadata, Album};
 
 /// Hostinfo Route
@@ -142,7 +143,7 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 /// Simple struct for the path parameters used in [file_head] and [file_serving]
 #[derive(Deserialize)]
 pub struct FileParams {
-	pub albun: String,
+	pub album: String,
 	pub file: String
 }
 
@@ -182,15 +183,15 @@ impl FileParams {
 /// File Head Route
 /// 
 /// Route for serving a file's metadata only
-pub async fn file_head(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
-	common_file(p, data).0
+pub async fn file_head(req: HttpRequest, p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
+	common_file(req, p, data).0
 }
 
 /// File Serving Route
 /// 
 /// Route for serving a file's content
 pub async fn file_serving(req: HttpRequest, p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
-	let resp = common_file(p, data);
+	let resp = common_file(req.clone(), p, data);
 
 	let response = match (resp.1, resp.2) {
 		(Some(data), Some(time)) => {
@@ -244,10 +245,13 @@ fn data_resp(data: Vec<u8>, heads: &HeaderMap) -> HttpResponse {
 /// 
 /// Internal Wrapper for [file_serving] and [file_head], so that I don't have to repeat myself.
 /// If the second item is [Some], then the entire response was successful so far. The tird element is also [Some] then.
-fn common_file(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> (HttpResponse, Option<Vec<u8>>, Option<DateTime<Utc>>) {
+fn common_file(req: HttpRequest, p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> (HttpResponse, Option<Vec<u8>>, Option<DateTime<Utc>>) {
+
+	// TODO: CHECK BASIC AUTH
+
 	// Get filesystem path
 	let pathdata = p.into_inner();
-	let Ok(path) = FileParams::find_file(&data.config.root, &pathdata.albun, pathdata.file) else {
+	let Ok(path) = FileParams::find_file(&data.config.root, &pathdata.album, pathdata.file) else {
 		return (responses::client_404(Some("File not found")), None, None);
 	};
 
@@ -261,16 +265,29 @@ fn common_file(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> (Ht
 		return (responses::server_500(Some("Failed to serve file")), None, None);
 	};
 
+	// Partial Content
+	let etag_header = format!("\"{}\"", hash(&data));
+	let slice = slice_maker(data, req.headers().get(header::RANGE));
+	let digest = hashgen(&slice.0);
+
 	// Create response
-	let digest = hashgen(&data);
-	let response = HttpResponse::Ok()
-	.insert_header((header::CONTENT_LENGTH, data.len()))
+	let mut wipresp = match slice.1 {
+    	Some(_) => HttpResponse::PartialContent(),
+    	None => HttpResponse::Ok(),
+	};
+	if let Some(rangehead) = slice.1 {
+		wipresp.insert_header((header::CONTENT_RANGE, rangehead));
+	}
+	let response = wipresp
+	.insert_header((header::ACCEPT_RANGES, "bytes"))
+	.insert_header((header::CONTENT_LENGTH, slice.0.len()))
 	.insert_header((header::CONTENT_TYPE, get_mime(path.extension())))
 	.insert_header((header::LAST_MODIFIED, time.0))
 	.insert_header(("Digest", format!("sha-256={},sha-512={},blake3={}", digest.2, digest.1, encode(digest.0.as_bytes()))))
-	.insert_header((header::ETAG, format!("\"{}\"", digest.0.to_hex())))
+	.insert_header((header::ETAG, etag_header))
 	.finish();
 
 
-	(response, Some(data), Some(time.1))
+	// TODO: Return slice used for data
+	(response, Some(slice.0), Some(time.1))
 }

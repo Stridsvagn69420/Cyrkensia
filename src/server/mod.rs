@@ -193,6 +193,7 @@ pub fn get_mime(extop: Option<&OsStr>) -> &str {
 		Some("aac") => "audio/aac",
 		Some("mp3") => "audio/mp3",
 		Some("opus") => "audio/opus",
+		Some("m4a") => "audio/mp4",
 		Some("wav") => "audio/wav",
 		Some("3gp") => "audio/3gpp",
 		Some("3g2") => "audio/3gpp2",
@@ -201,4 +202,51 @@ pub fn get_mime(extop: Option<&OsStr>) -> &str {
 		Some("weba") | Some("webm") => "audio/webm",
 		_ => "application/octet-stream"
 	}
+}
+
+/// Slice Maker
+/// 
+/// Gets the given range of appened bytearray. The first item is the data, the second one the Content-Range header.
+pub fn slice_maker(data: Vec<u8>, header: Option<&HeaderValue>) -> (Vec<u8>, Option<String>) {
+	let data_len = data.len();
+
+	// Format range
+	let Some(rangehead) = header
+	.and_then(|x|x.to_str().ok()) else {
+		return (data, None);
+	};
+	let binding = rangehead.replace("bytes=", "");
+ 	let mut range = binding.split('-');
+
+	// Parse range
+	if let (Some(x), Some(y)) = (range.nth(0), range.nth(0)) {
+		return match (x.parse::<usize>(), y.parse::<usize>()) {
+    		(Ok(a), Ok(b)) => {
+				// Get full-range slice
+				if data.get(a).is_some() && data.get(b).is_some() {
+					return (data[a..b].to_owned(), Some(format!("bytes {a}-{b}/{data_len}")));
+				} else {
+					return (data, None);
+				}
+			},
+    		(Ok(a), Err(_)) => {
+				// Get start-range slice
+				if data.get(a).is_some() {
+					return (data[a..].to_owned(), Some(format!("bytes {a}-{}/{data_len}", data_len - 1)));
+				} else {
+					return (data, None);
+				}
+			},
+    		(Err(_), Ok(b)) => {
+				// Get end-range slice
+				if data.get(b).is_some() {
+					return (data[..b].to_owned(), Some(format!("bytes 0-{b}/{data_len}")));
+				} else {
+					return (data, None);
+				}
+			},
+    		(Err(_), Err(_)) => (data, None),
+		}
+	}
+	(data, None)
 }

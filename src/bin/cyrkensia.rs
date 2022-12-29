@@ -4,7 +4,7 @@ use cyrkensia::{Config, timelog, timestamp};
 use cyrkensia::meta::WIKI_HELP_URL;
 use cyrkensia::server::CyrkensiaState;
 use cyrkensia::server::redirect::trail_slash;
-use cyrkensia::server::routes::{index, hostinfo};
+use cyrkensia::server::routes::{index, hostinfo, file_head, file_serving};
 use cyrkensia::server::middleware::{cors_everywhere, source_headers, license_headers};
 use actix_web::{web, App, HttpServer};
 use kagero::printer::{Printer, Colors};
@@ -54,8 +54,11 @@ async fn server(cfg: Config) -> io::Result<()> {
 		.wrap(license_headers())
 		//Routes
 		.route("/", web::get().to(hostinfo))
+		// TODO: Add favicon route
 		.route("/{album}/", web::get().to(index))
 		.route("/{album}", web::get().to(trail_slash))
+		.route("/{album}/{file}", web::get().to(file_serving))
+		.route("/{album}/{file}", web::head().to(file_head))
 	});
 
 	// ---- Server Bind ----
