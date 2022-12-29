@@ -1,10 +1,13 @@
 use std::path::PathBuf;
 use std::time::Instant;
 use std::{io, fs};
-use actix_web::{web, Responder, HttpResponse};
-use actix_web::http::header::ContentType;
+use base64::encode;
+use actix_web::{web, Responder, HttpResponse, HttpRequest};
+use actix_web::http::header::HeaderMap;
+use actix_web::http::header;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
-use super::{CyrkensiaState, responses};
+use super::{CyrkensiaState, responses, hashgen, filetime, compare_time, get_mime};
 use crate::{Hostinfo, Artist, Metadata, Album};
 
 /// Hostinfo Route
@@ -125,9 +128,11 @@ pub async fn index(p: web::Path<IndexParams>, data: web::Data<CyrkensiaState>) -
 
 	// Send response
 	HttpResponse::Ok()
-	.content_type(ContentType::html())
+	.content_type(header::ContentType::html())
 	.body(format!("<html><head>{}</head><body>{}{}</body></html>", headmeta, headstr, bodystr))
 }
+
+
 
 
 
@@ -176,31 +181,96 @@ impl FileParams {
 
 /// File Head Route
 /// 
-/// 
-pub async fn file_serving(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
-	let path = p.into_inner();
-
-	// Generate ETag with BLAKE3 hash as Hexadecimal
-	// Generate Digest header with BLAKE3, SHA-256, SHA-512 as Base64
-	// Generate Last-Modified header from fs::metadata
-	// Match HTTP Status Codes
-
-	HttpResponse::Ok()
+/// Route for serving a file's metadata only
+pub async fn file_head(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
+	common_file(p, data).0
 }
 
 /// File Serving Route
 /// 
-/// 
-pub async fn file_head(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
-	let pathdata = p.into_inner();
-	let Ok(path) = FileParams::find_file(&data.config.root, &pathdata.albun, pathdata.file) else {
-		return responses::client_404(Some("File not found"));
+/// Route for serving a file's content
+pub async fn file_serving(req: HttpRequest, p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> impl Responder {
+	let resp = common_file(p, data);
+
+	let response = match (resp.1, resp.2) {
+		(Some(data), Some(time)) => {
+			// If-Modified-Since behaviour
+			if let Some(headval) = req.headers().get(header::IF_MODIFIED_SINCE) {
+				if let Ok(new) = compare_time(time, headval) {
+					if new {
+						// 200 OK
+						return data_resp(data, resp.0.headers());
+					} else {
+						// 304 Not Modified
+						let mut newres = HttpResponse::NotModified();
+						copy_headers!(newres, resp.0.headers());
+						return newres.finish();
+					}
+				}
+			}
+			// Normal file serving
+			data_resp(data, resp.0.headers())
+		},
+		// Convert Error Body
+		_ => resp.0
 	};
 
-	// Generate ETag with BLAKE3 hash as Hexadecimal
-	// Generate Digest header with BLAKE3, SHA-256, SHA-512 as Base64
-	// Generate Last-Modified header from fs::metadata
-	// Include If-Modified-Since behaviour and match HTTP Status Codes
+	response
+}
 
-	HttpResponse::Ok().finish()
+/// Copy Headers
+/// 
+/// Copies the &[HeaderMap](HeaderMap) from a finished respose to a new reponse.
+#[macro_export]
+macro_rules! copy_headers {
+	($resp:expr, $heads:expr) => {
+		for ele in $heads {
+			$resp.insert_header(ele);
+		}
+	};
+}
+pub use copy_headers;
+
+/// Data Reponse
+/// 
+/// Converts a normal response to a data response
+fn data_resp(data: Vec<u8>, heads: &HeaderMap) -> HttpResponse {
+	let mut datares =  HttpResponse::Ok();
+	copy_headers!(datares, heads);
+	datares.body(data)
+}
+
+/// INTERNAL File Route Wrapper
+/// 
+/// Internal Wrapper for [file_serving] and [file_head], so that I don't have to repeat myself.
+/// If the second item is [Some], then the entire response was successful so far. The tird element is also [Some] then.
+fn common_file(p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> (HttpResponse, Option<Vec<u8>>, Option<DateTime<Utc>>) {
+	// Get filesystem path
+	let pathdata = p.into_inner();
+	let Ok(path) = FileParams::find_file(&data.config.root, &pathdata.albun, pathdata.file) else {
+		return (responses::client_404(Some("File not found")), None, None);
+	};
+
+	// Generate Last-Modified header from fs::metadata
+	let Ok(time) = filetime(&path) else {
+		return (responses::server_500(Some("Failed to read file")), None, None);
+	};
+
+	// Read file
+	let Ok(data) = fs::read(&path) else {
+		return (responses::server_500(Some("Failed to serve file")), None, None);
+	};
+
+	// Create response
+	let digest = hashgen(&data);
+	let response = HttpResponse::Ok()
+	.insert_header((header::CONTENT_LENGTH, data.len()))
+	.insert_header((header::CONTENT_TYPE, get_mime(path.extension())))
+	.insert_header((header::LAST_MODIFIED, time.0))
+	.insert_header(("Digest", format!("sha-256={},sha-512={},blake3={}", digest.2, digest.1, encode(digest.0.as_bytes()))))
+	.insert_header((header::ETAG, format!("\"{}\"", digest.0.to_hex())))
+	.finish();
+
+
+	(response, Some(data), Some(time.1))
 }
