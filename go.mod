@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Stridsvagn69420/pringo v0.9.1
 	github.com/gofiber/fiber/v2 v2.38.1
-	github.com/tg123/go-htpasswd v1.2.0
+	github.com/tg123/go-htpasswd v1.2.1
 )
 
 require (
@@ -15,6 +15,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.40.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
-	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 )
