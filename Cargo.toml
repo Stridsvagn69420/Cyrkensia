@@ -1,0 +1,42 @@
+[package]
+name = "cyrkensia"
+description = "Server for Azura and Shigure music repositories"
+version = "2.0.0"
+edition = "2021"
+rust-version = "1.65"
+license = "EUPL-1.2"
+readme = "README.md"
+build = "build.rs"
+repository = "https://github.com/Stridsvagn69420/Cyrkensia"
+homepage = "https://github.com/Stridsvagn69420/Cyrkensia"
+documentation = "https://docs.rs/cyrkensia"
+authors = ["Stridsvagn69420"]
+categories = ["web-programming::http-server", "web-programming", "multimedia", "multimedia::audio", "filesystem"]
+keywords = ["music", "server", "repository"]
+default-run = "cyrkensia"
+
+[dependencies]
+
+[features]
+
+[build-dependencies]
+
+[[bin]]
+name = "cyrkensia"
+path = "src/bin/cyrkensia.rs"
+
+[profile.release]
+lto = true
+strip = true
+debug = false
+
+[package.metadata.docs.rs]
+targets = [
+	"x86_64-unknown-linux-gnu",
+	"x86_64-pc-windows-msvc",
+	"x86_64-pc-windows-gnu",
+	"aarch64-unknown-linux-gnu",
+	"x86_64-unknown-openbsd",
+	"x86_64-unknown-freebsd",
+	"x86_64-apple-darwin"
+]

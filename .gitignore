@@ -1,7 +1,1 @@
-# Go
-/build/
-/cyrkensia.exe
-/cyrkensia
-
-# Test
-test.json
+/target
