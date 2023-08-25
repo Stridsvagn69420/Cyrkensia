@@ -8,7 +8,7 @@
 ![Stars](https://img.shields.io/github/stars/Stridsvagn69420/Cyrkensia.svg)
 ![Downloads](https://img.shields.io/crates/d/cyrkensia.svg)
 
-Server for [Azura](https://github.com/Stridsvagn69420/Azura) and [Shigure](https://github.com/Stridsvagn69420/Shigure) music repositories
+Music Repository Server
 
 <!--TODO: Add larger description here-->
 

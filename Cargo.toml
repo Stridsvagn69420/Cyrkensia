@@ -1,9 +1,9 @@
 [package]
 name = "cyrkensia"
-description = "Server for Azura and Shigure music repositories"
-version = "2.0.0"
+description = "Music Repository Server"
+version = "0.1.0"
 edition = "2021"
-rust-version = "1.65"
+rust-version = "1.70"
 license = "EUPL-1.2"
 readme = "README.md"
 build = "build.rs"

@@ -1,0 +1,96 @@
+--------Dependencies--------
+actix-web (ADD: rustls)
+actix-files
+diesel (ADD: mysql sqlite postgres)
+libsqlite3-sys (ADD: bundled)
+argon2
+
+----------Database----------
+Artists:
+-Id: u32 (for DB)
+-Uuid: Uuid (for global)
+-Name: String
+-Website: Uri or String
+
+Albums:
+-Id: u32 (for DB)
+-Uuid: Uuid (for global)
+-Name: String
+-Year: Date
+-Cover: Path or String (for disk)
+
+Songs:
+-Id: u32 (for DB)
+-Uuid: Uuid (for global)
+-Name: String
+-Year: Date
+-Explicit: Boolean
+-Path: Path or String (for disk)
+-Album: u32 (for DB)
+
+SongsArtists:
+-Song: u32 (Songs.Id)
+-Artist: u32 (Artists.Id)
+
+Maintainers:
+-Name: String
+-Contact: Uri or String
+
+Accounts:
+-Username: String
+-PhcHash: String
+
+---------Structures---------
+-Maintainer (inherit from Maintainers)
+-Account (inherit from Accounts)
+-Artist (inherit from Artists)
+-Song (inherit from Songs + SongsArtists, add Filesize + Hash, serve via HTTP-Head too)
+-Album (inherit from Albums)
+-Hostinfo:
+--Name: String
+--Uuid: Uuid
+--Website: Uri or String
+--Maintainers: Array<Maintainer>
+--Secured: Boolean
+--Endpoints: Endpoints
+-Endpoints:
+--Hostinfo: Uri or String
+--Index: Uri or String
+--Metadata: Uri or String
+--Filedata: Uri or String
+--Richdata: Uri or String (optional)
+
+-----------Routes-----------
+Hostinfo:
+-Description: Information of Music Server
+-Example: "/", "/hostinfo"
+-Methods: GET
+-Response: Hostinfo struct
+
+Index:
+-Description: Search for Songs, Albums, Artists
+-Example: "/index/{type}"
+-Input: URLPath
+-Methods: GET
+-Response: List of Type
+
+Metadata:
+-Description: Retrieve Song, Album, Artist Metadata
+-Example: "/metadata/{type}/{uuid}"
+-Input: URLPath
+-Methods: GET
+-Response: Metadata of Item
+
+Richdata:
+-Description: Retrieve Album, Host, Artist Artwork
+-Example: "/richdata/{type}/{uuid}", "/richdata/{type}/host"
+-Input: URLPath
+-Methods: GET
+-Response: Artwork of Item
+
+Filedata:
+-Description: Get Audio Data
+-Example: "/filedata/{ArtistUuid}/{AlbumUuid}/{SongUuid}"
+-Input: URLPath
+-Methods: GET
+-Response: Audio Data in HTTP-Body, File Metadata in HTTP-Head
