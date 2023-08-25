@@ -8,29 +8,28 @@ argon2
 ----------Database----------
 Artists:
 -Id: u32 (for DB)
--Uuid: Uuid (for global)
+-Path: Path or String
 -Name: String
 -Website: Uri or String
 
 Albums:
 -Id: u32 (for DB)
--Uuid: Uuid (for global)
 -Name: String
--Year: Date
--Cover: Path or String (for disk)
+-Year: Date or String
+-Genre: String or Enum
+-Path: Path or String
 
 Songs:
 -Id: u32 (for DB)
--Uuid: Uuid (for global)
 -Name: String
 -Year: Date
 -Explicit: Boolean
--Path: Path or String (for disk)
+-Path: Path or String
 -Album: u32 (for DB)
 
 SongsArtists:
--Song: u32 (Songs.Id)
--Artist: u32 (Artists.Id)
+-Song: u32 (for DB)
+-Artist: u32 (for DB)
 
 Maintainers:
 -Name: String
@@ -44,7 +43,7 @@ Accounts:
 -Maintainer (inherit from Maintainers)
 -Account (inherit from Accounts)
 -Artist (inherit from Artists)
--Song (inherit from Songs + SongsArtists, add Filesize + Hash, serve via HTTP-Head too)
+-Song (inherit from Songs + SongsArtists)
 -Album (inherit from Albums)
 -Hostinfo:
 --Name: String
@@ -54,11 +53,9 @@ Accounts:
 --Secured: Boolean
 --Endpoints: Endpoints
 -Endpoints:
---Hostinfo: Uri or String
---Index: Uri or String
 --Metadata: Uri or String
---Filedata: Uri or String
---Richdata: Uri or String (optional)
+--Metadata: Uri or String
+--Audiodata: Uri or String
 
 -----------Routes-----------
 Hostinfo:
@@ -67,30 +64,25 @@ Hostinfo:
 -Methods: GET
 -Response: Hostinfo struct
 
-Index:
--Description: Search for Songs, Albums, Artists
--Example: "/index/{type}"
+Audiodata:
+-Description: Get Audio Data
 -Input: URLPath
--Methods: GET
--Response: List of Type
+-Example: "/audiodata/{ArtistDirname}/{AlbumDirname}/{SongFilename}"
+-Methods: GET, HEAD
+-Response: Audio Data in HTTP-Body, Metadata in HTTP-Head
+
+-Example: "/audiodata/{ArtistDirname}/{AlbumDirname}"
+-Response: Song List of Album
+
+-Example: "/audiodata/{ArtistDirname}"
+-Response: Album List of Artist
+
+-Example: "/audiodata"
+-Response: Artist List of Host
 
 Metadata:
 -Description: Retrieve Song, Album, Artist Metadata
--Example: "/metadata/{type}/{uuid}"
+-Example: "/metadata/{ArtistDirname}/{AlbumDirname}/{SongFilename}" (Same structure as Audio Data)
 -Input: URLPath
 -Methods: GET
 -Response: Metadata of Item
-
-Richdata:
--Description: Retrieve Album, Host, Artist Artwork
--Example: "/richdata/{type}/{uuid}", "/richdata/{type}/host"
--Input: URLPath
--Methods: GET
--Response: Artwork of Item
-
-Filedata:
--Description: Get Audio Data
--Example: "/filedata/{ArtistUuid}/{AlbumUuid}/{SongUuid}"
--Input: URLPath
--Methods: GET
--Response: Audio Data in HTTP-Body, File Metadata in HTTP-Head
