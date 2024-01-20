@@ -1,6 +1,6 @@
 [package]
 name = "cyrkensia"
-description = "Music Repository Server"
+description = "A simple music server"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.70"
@@ -12,8 +12,9 @@ homepage = "https://github.com/Stridsvagn69420/Cyrkensia"
 documentation = "https://docs.rs/cyrkensia"
 authors = ["Stridsvagn69420"]
 categories = ["web-programming::http-server", "web-programming", "multimedia", "multimedia::audio", "filesystem"]
-keywords = ["music", "server", "repository"]
+keywords = ["music", "server", "audio", "repository"]
 default-run = "cyrkensia"
+exclude = [ ".github/", ".vscode/", "SECURITY.md", "target/", ".*" ]
 
 [dependencies]
 
@@ -37,6 +38,5 @@ targets = [
 	"x86_64-pc-windows-gnu",
 	"aarch64-unknown-linux-gnu",
 	"x86_64-unknown-openbsd",
-	"x86_64-unknown-freebsd",
-	"x86_64-apple-darwin"
+	"x86_64-unknown-freebsd"
 ]

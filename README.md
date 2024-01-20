@@ -8,12 +8,6 @@
 ![Stars](https://img.shields.io/github/stars/Stridsvagn69420/Cyrkensia.svg)
 ![Downloads](https://img.shields.io/crates/d/cyrkensia.svg)
 
-Music Repository Server
+A simple music server
 
-<!--TODO: Add larger description here-->
-
-# Installation
-WIP.
-
-# Usage
-WIP.
+<!-- TODO: Add more description -->
