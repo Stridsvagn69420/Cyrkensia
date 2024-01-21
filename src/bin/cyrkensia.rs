@@ -1,5 +1,3 @@
-use cyrkensia::TEST;
-
 fn main() {
-    println!("{TEST}");
+	println!("Hello, World! This will be the actual Cyrkensia Server.");
 }
