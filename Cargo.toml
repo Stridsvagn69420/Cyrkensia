@@ -1,0 +1,65 @@
+[package]
+name = "cyrkensia"
+description = "A simple music server"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+license = "EUPL-1.2"
+readme = "README.md"
+build = "build.rs"
+repository = "https://github.com/Stridsvagn69420/Cyrkensia"
+homepage = "https://github.com/Stridsvagn69420/Cyrkensia"
+documentation = "https://docs.rs/cyrkensia"
+authors = ["Stridsvagn69420"]
+categories = ["web-programming::http-server", "web-programming", "multimedia", "multimedia::audio", "filesystem"]
+keywords = ["music", "server", "audio", "repository"]
+default-run = "cyrkensia"
+exclude = [ ".github/", ".vscode/", "SECURITY.md", "target/", ".*" ]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+argon2 = { version = "0.5", features = ["std"], optional = true }
+tokio = { version = "1.35", features = ["io-util", "fs", "sync", "time"], optional = true }
+actix-web = { version = "4", features = ["rustls"], optional = true }
+
+[features]
+default = ["database", "middleware", "routes"]
+
+# Database
+database = ["tokio", "argon2", "serde_json"]
+
+# Server
+server = ["tokio", "actix-web", "serde_json", "database"]
+middleware = ["server"]
+routes = ["server"]
+
+[build-dependencies]
+
+[[bin]]
+name = "cyrkensia"
+path = "src/bin/cyrkensia.rs"
+
+[[bin]]
+name = "cyrkensia-db"
+path = "src/bin/cyrkensia-db.rs"
+
+[[bin]]
+name = "cyrkensia-user"
+path = "src/bin/cyrkensia-user.rs"
+
+[profile.release]
+lto = true
+strip = true
+debug = false
+
+[package.metadata.docs.rs]
+all-features = true
+targets = [
+	"x86_64-unknown-linux-gnu",
+	"x86_64-pc-windows-msvc",
+	"x86_64-pc-windows-gnu",
+	"aarch64-unknown-linux-gnu",
+	"x86_64-unknown-openbsd",
+	"x86_64-unknown-freebsd"
+]

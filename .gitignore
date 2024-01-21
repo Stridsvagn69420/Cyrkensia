@@ -1,7 +1,2 @@
-# Go
-/build/
-/cyrkensia.exe
-/cyrkensia
-
-# Test
-test.json
+# Rust
+/target/

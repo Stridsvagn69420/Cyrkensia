@@ -1,16 +1,13 @@
 # Cyrkensia
-Server for [Azura](https://github.com/Stridsvagn69420/Azura) and [Shigure](https://github.com/Stridsvagn69420/Shigure) music repositories
+![Build (Windows)](https://github.com/Stridsvagn69420/Cyrkensia/actions/workflows/build-windows.yml/badge.svg?branch=master)
+![Build (Linux)](https://github.com/Stridsvagn69420/Cyrkensia/actions/workflows/build-linux.yml/badge.svg?branch=master)
+![Clippy](https://github.com/Stridsvagn69420/Cyrkensia/actions/workflows/cargo-clippy.yml/badge.svg?branch=master)
+![docs.rs](https://docs.rs/cyrkensia/badge.svg)
+![Version](https://img.shields.io/crates/v/cyrkensia.svg)
+![License](https://img.shields.io/crates/l/cyrkensia.svg)
+![Stars](https://img.shields.io/github/stars/Stridsvagn69420/Cyrkensia.svg)
+![Downloads](https://img.shields.io/crates/d/cyrkensia.svg)
 
-# Features
-* ✅ Simple cloud hosting for your music files
-* 💻 Available everywhere where [Go](https://go.dev/) compiles
-* 🔒 Direct support for SSL/TLS and HTTP-Authentication
-* 🚀 Blazingly fast thanks to the [Fiber](https://github.com/gofiber/fiber)-Framework and Go's performant architecture
+A simple music server
 
-# Installation, Usage, Configuration and RPC-Assets
-You can find every info, from installing Cyrkensia to just looking at available RPC-Assets, in the Wiki:
-* [File Structure](https://github.com/Stridsvagn69420/Cyrkensia/wiki/File-Structure)
-* [Rich Presence Assets](https://github.com/Stridsvagn69420/Cyrkensia/wiki/RPC-Assets)
-* [Access Control](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Access-Control)
-* [Installation](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Installation)
-* [Usage](https://github.com/Stridsvagn69420/Cyrkensia/wiki/Usage)
+<!-- TODO: Add more description -->
