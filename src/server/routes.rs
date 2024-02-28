@@ -1,14 +1,13 @@
 use std::path::PathBuf;
 use std::time::Instant;
 use std::{io, fs};
-use blake3::hash;
 use base64::encode;
 use actix_web::{web, Responder, HttpResponse, HttpRequest};
 use actix_web::http::header::HeaderMap;
 use actix_web::http::header;
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
-use super::{CyrkensiaState, responses, hashgen, filetime, compare_time, get_mime, slice_maker};
+use super::{CyrkensiaState, responses, hashgen, filetime, compare_time, get_mime};
 use crate::{Hostinfo, Artist, Metadata, Album};
 
 /// Hostinfo Route
@@ -248,6 +247,12 @@ fn data_resp(data: Vec<u8>, heads: &HeaderMap) -> HttpResponse {
 fn common_file(req: HttpRequest, p: web::Path<FileParams>, data: web::Data<CyrkensiaState>) -> (HttpResponse, Option<Vec<u8>>, Option<DateTime<Utc>>) {
 
 	// TODO: CHECK BASIC AUTH
+	/* it's literally just:
+	1. Extract header value, return 401 if missing
+	2. Parse header values, return 401 if error
+	3. Find given user, return 401 otherwise
+	4. Continue if `Account::verify(somevar)` is `Ok(())`, else do the 401
+	(This is with Rust error handling already btw) */
 
 	// Get filesystem path
 	let pathdata = p.into_inner();
@@ -266,28 +271,17 @@ fn common_file(req: HttpRequest, p: web::Path<FileParams>, data: web::Data<Cyrke
 	};
 
 	// Partial Content
-	let etag_header = format!("\"{}\"", hash(&data));
-	let slice = slice_maker(data, req.headers().get(header::RANGE));
-	let digest = hashgen(&slice.0);
+	let digest = hashgen(&data);
 
 	// Create response
-	let mut wipresp = match slice.1 {
-    	Some(_) => HttpResponse::PartialContent(),
-    	None => HttpResponse::Ok(),
-	};
-	if let Some(rangehead) = slice.1 {
-		wipresp.insert_header((header::CONTENT_RANGE, rangehead));
-	}
+	let mut wipresp = HttpResponse::Ok();
 	let response = wipresp
-	.insert_header((header::ACCEPT_RANGES, "bytes"))
-	.insert_header((header::CONTENT_LENGTH, slice.0.len()))
+	.insert_header((header::CONTENT_LENGTH, data.len()))
 	.insert_header((header::CONTENT_TYPE, get_mime(path.extension())))
 	.insert_header((header::LAST_MODIFIED, time.0))
 	.insert_header(("Digest", format!("sha-256={},sha-512={},blake3={}", digest.2, digest.1, encode(digest.0.as_bytes()))))
-	.insert_header((header::ETAG, etag_header))
+	.insert_header((header::ETAG, format!("\"{}\"", digest.0)))
 	.finish();
 
-
-	// TODO: Return slice used for data
-	(response, Some(slice.0), Some(time.1))
+	(response, Some(data), Some(time.1))
 }
